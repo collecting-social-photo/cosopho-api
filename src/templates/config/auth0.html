@@ -1,0 +1,141 @@
+<html>
+
+<head>
+  <title>Setup Auth0</title>
+  {{> head}}
+  <link href="/css/prism.css" rel="stylesheet" />
+</head>
+
+<body>
+
+  <section class="hero is-primary is-bold">
+    <div class="hero-body">
+      <div class="container">
+        <h1 class="title capitalise is-1">
+          Initial Setup
+        </h1>
+        <h2 class="subtitle is-3">
+          This is where you enter the Auth0 information to get started
+        </h2>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+
+      <h1 class="title">Auth0</h1>
+      <p>
+        To use this API server you should first set up and be familiar with
+        <a href="https://auth0.com/">Auth0</a> which will act as your authentication and allow users to register and
+        log into the API server. You as the
+        1st user will be an admin user, who will then control the roles and rights of new users who sign up.
+      </p>
+      <p>
+        Before you fill in the details in the form, please create an Auth0 account, create an application and then use
+        the details
+        provided.
+      </p>
+      <p>
+        <form method="POST">
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Auth0 domain</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  <input class="input" type="text" name="AUTH0_DOMAIN" value="" placeholder="domain.auth0.com" />
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Auth0 client ID</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  <input class="input" type="text" name="AUTH0_CLIENT_ID" value="" placeholder="abcdef0123456789" />
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Auth0 secret</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  <input class="input" type="text" name="AUTH0_SECRET" value="" placeholder="abcdef0123456789" />
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Auth0 callback url</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  <input class="input" type="text" name="AUTH0_CALLBACK_URL" value="" placeholder="https://domain.com/callback" />
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Elastic Search</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  <input class="input" type="text" name="elasticsearch" placeholder="{{#ifEqual NODE_ENV 'development'}}http://localhost:9200{{else}}https://domain.com{{/ifEqual}}"
+                    {{#if config.elasticsearch.host}} value="{{config.elasticsearch.host}}" {{/if}}>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Handshake</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <p class="control">
+                  <input class="input" type="text" name="handshake" value="{{handshake}}" placeholder="Your handshake token" />
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="level">
+            <div class="level-left">
+              <div class="level-item">&nbsp;</div>
+            </div>
+            <div class="level-right">
+              <div class="level-item">
+                <p class="control">
+                  <button class="button is-primary" type="submit" value="save" name="action">Save</button>
+                </p>
+              </div>
+            </div>
+          </div>
+        </form>
+      </p>
+
+    </div>
+  </section>
+
+  {{> tail}}
+</body>
+
+</html>
