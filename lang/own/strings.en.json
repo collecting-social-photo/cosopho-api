@@ -1,0 +1,9 @@
+{
+  "nav": {
+    "developer": "developer"
+  },
+  "config": {
+    "config": "config",
+    "intro": "These are where you set remote endpoints and local file processing details"
+  }
+}
