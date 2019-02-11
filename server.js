@@ -48,6 +48,11 @@ const argOptionDefinitions = [{
     type: String
   },
   {
+    name: 'instance',
+    alias: 'i',
+    type: String
+  },
+  {
     name: 'port',
     alias: 'p',
     type: Number
@@ -118,7 +123,12 @@ if (!argOptions) {
  * base everything else
  */
 if (argOptions && !argOptions.key) {
-  console.log(`\n\nYou must pass the 'key' parameter 'yarn start --key xxxxx' see the README.md for more details\n\n`.error)
+  console.log(`\n\nYou must pass the 'key' parameter 'yarn start --key xxxxx --instance yyyyy' see the README.md for more details\n\n`.error)
+  showHelp = true
+}
+
+if (argOptions && !argOptions.instance) {
+  console.log(`\n\nYou must pass the 'instance' parameter 'yarn start --key xxxxx --instance xxxxx' see the README.md for more details\n\n`.error)
   showHelp = true
 }
 
@@ -132,6 +142,7 @@ Usage: yarn start [options]
 
 Options:
  -k, --key              The 'key' used to reference tables in the database, must be unique per app
+ -i, --instance         The 'instance stub' as defined in the dashboard, that this graphQL server is in charge of
  -p, --port [4000]      The port to run on (default 4000)
  -t, --host [localhost] The host to run on (default localhost)
  -e, --env [development|staging|production]

@@ -1,6 +1,10 @@
 exports.index = (req, res) => {
-  console.log(req.templateValues)
-  return res.render('main/index', req.templateValues)
+  //  If we are an admin user, then we go to the admin page, otherwise
+  //  we go to the developer portal
+  if (req.user.roles.isAdmin) {
+    return res.redirect('/admin')
+  }
+  return res.redirect('/developer')
 }
 
 exports.wait = (req, res) => {

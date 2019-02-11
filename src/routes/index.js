@@ -16,9 +16,6 @@ const {
 const schemaPublic = require('../modules/schema/public.js')
 const getDefaultTemplateData = require('../helpers').getDefaultTemplateData
 
-const config = require('./config')
-const main = require('./main')
-
 // Note: '*' will whitelist all domains.
 // If we remove the auth, we may want to lock this down.
 const coorsAllowedOrigin = '*'
@@ -299,10 +296,17 @@ router.use('/:token/playground', bodyParser.json(), expressGraphql(async (req) =
 //  Finally the routes
 //
 // ############################################################################
+const admin = require('./admin')
+const config = require('./config')
+const main = require('./main')
 
 router.get('/:lang', main.index)
 router.post('/:lang', main.index)
 router.get('/:lang/wait', main.wait)
+
+router.get('/:lang/admin', admin.index)
+router.post('/:lang/admin', admin.index)
+
 router.get('/:lang/config', ensureLoggedIn, config.index)
 router.post('/:lang/config', ensureLoggedIn, config.index)
 
