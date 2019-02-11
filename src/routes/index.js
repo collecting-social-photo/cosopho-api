@@ -81,24 +81,10 @@ router.use(function (req, res, next) {
   const defaultLang = 'en'
   let selectedLang = 'en'
 
-  if (req.user === undefined) {
+  if (req.session.user === undefined) {
     req.user = null
   } else {
-    //  Shortcut the roles
-    if ('user_metadata' in req.user && 'roles' in req.user.user_metadata) {
-      req.user.roles = req.user.user_metadata.roles
-    } else {
-      req.user.roles = {
-        isAdmin: false,
-        isDeveloper: false,
-        isStaff: false
-      }
-    }
-    if ('user_metadata' in req.user && 'apitoken' in req.user.user_metadata) {
-      req.user.apitoken = req.user.user_metadata.apitoken
-    } else {
-      req.user.apitoken = null
-    }
+    req.user = req.session.user
   }
 
   //  Read in the language files and overlay the selected langage on the
@@ -122,7 +108,7 @@ router.use(function (req, res, next) {
   const urlClean = req.url.split('?')[0]
   const urlSplit = urlClean.split('/')
   if (urlSplit[0] === '') urlSplit.shift()
-  if (!nonLangUrls.includes(urlSplit[0]) && !urlSplit[urlSplit.length - 1] === 'playground') {
+  if (!nonLangUrls.includes(urlSplit[0]) && urlSplit[urlSplit.length - 1] !== 'playground') {
     //  Check to see if the first entry isn't a language,
     //  if it's not pop the selectedLang into the url
     //  and try again
@@ -256,8 +242,10 @@ if (configObj.get('auth0') !== null) {
     }),
     async function (req, res) {
       // Update the user with extra information
-      req.user = await new User().get(req.user)
-      res.redirect(req.session.returnTo || '/')
+      req.session.user = await new User().get(req.user)
+      return setTimeout(() => {
+        res.redirect(307, req.session.returnTo || '/')
+      }, 1000)
     }
   )
 }

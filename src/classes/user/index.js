@@ -216,6 +216,16 @@ class User {
 
     //  Go and get the user from Auth0
     const user = await getUser(id)
+
+    //  move over some of the data from auth0 to our template
+    if (typeof auth0id === 'object') {
+      user.displayName = ''
+      if (auth0id.displayName) user.displayName = auth0id.displayName
+      if (auth0id.nickname) user.displayName = auth0id.nickname
+
+      user.icon = null
+      if (auth0id.picture) user.icon = auth0id.picture
+    }
     return user
   }
 

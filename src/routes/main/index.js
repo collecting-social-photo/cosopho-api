@@ -1,4 +1,5 @@
 exports.index = (req, res) => {
+  console.log(req.templateValues)
   return res.render('main/index', req.templateValues)
 }
 
