@@ -1,3 +1,15 @@
-/app
-/node_modules
+/.DS_Store
 /.pid
+/.sass-cache
+/.vscode
+/app
+!app/public/stylesheets/prism.css
+/data
+/lang/collection/strings.json
+/logs
+/node_modules
+/package-lock.json
+/tmp
+/*log
+/*.old
+/*.old.*
