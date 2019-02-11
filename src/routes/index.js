@@ -7,10 +7,35 @@ const router = express.Router()
 const User = require('../classes/user')
 const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn()
 const Config = require('../classes/config')
+const expressGraphql = require('express-graphql')
+const bodyParser = require('body-parser')
+const cors = require('cors')
+const {
+  buildSchema
+} = require('graphql')
+const schemaPublic = require('../modules/schema/public.js')
 const getDefaultTemplateData = require('../helpers').getDefaultTemplateData
 
 const config = require('./config')
 const main = require('./main')
+
+// Note: '*' will whitelist all domains.
+// If we remove the auth, we may want to lock this down.
+const coorsAllowedOrigin = '*'
+
+// bypass auth for preflight requests
+// we need this because the apolloClient uses fetch which triggers a preflight request
+router.options('/*', function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', coorsAllowedOrigin)
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,OPTIONS')
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With')
+  res.sendStatus(200)
+})
+
+// enable cors. "credentials: true" is needed to pass auth through cors.
+router.use(cors({
+  origin: coorsAllowedOrigin
+}))
 
 //  Redirect to https, make sure...
 //  app.enable('trust proxy')
@@ -93,11 +118,11 @@ router.use(function (req, res, next) {
 
   //  If we are *not* on a login, logout or callback url then
   //  we need to check for langage stuff
-  const nonLangUrls = ['login', 'logout', 'callback', 'images', 'api']
+  const nonLangUrls = ['login', 'logout', 'callback', 'images', 'api', 'playground', 'graphql']
   const urlClean = req.url.split('?')[0]
   const urlSplit = urlClean.split('/')
   if (urlSplit[0] === '') urlSplit.shift()
-  if (!nonLangUrls.includes(urlSplit[0])) {
+  if (!nonLangUrls.includes(urlSplit[0]) && !urlSplit[urlSplit.length - 1] === 'playground') {
     //  Check to see if the first entry isn't a language,
     //  if it's not pop the selectedLang into the url
     //  and try again
@@ -236,6 +261,56 @@ if (configObj.get('auth0') !== null) {
     }
   )
 }
+
+// ############################################################################
+//
+//  All the graphQL stuff
+//
+// ############################################################################
+//  This is the resolver
+const root = {
+  hello: () => {
+    return `world`
+  }
+}
+
+const getGrpObj = (isPlayground, userRoles, token) => {
+  const grpObj = {
+    schema: buildSchema(schemaPublic.schema),
+    rootValue: root,
+    context: {
+      token
+    },
+    userRoles,
+    graphiql: isPlayground
+  }
+  return grpObj
+}
+
+const getRoles = async (token) => {
+  return {}
+}
+
+router.use('/graphql', bodyParser.json(), expressGraphql(async (req) => {
+  let token = null
+  if (req && req.headers && req.headers.authorization) {
+    const tokenSplit = req.headers.authorization.split(' ')
+    if (tokenSplit[1]) token = tokenSplit[1]
+  }
+  const userRoles = await getRoles(token)
+  return (getGrpObj(false, userRoles, token))
+}))
+
+router.use('/:token/playground', bodyParser.json(), expressGraphql(async (req) => {
+  const userRoles = await getRoles(req.params.token)
+  return (getGrpObj(true, userRoles, req.params.token))
+}))
+
+// ############################################################################
+//
+//  Finally the routes
+//
+// ############################################################################
 
 router.get('/:lang', main.index)
 router.post('/:lang', main.index)
