@@ -14,7 +14,12 @@ const {
   buildSchema
 } = require('graphql')
 const schemaPublic = require('../modules/schema/public.js')
+const schemaAdmin = require('../modules/schema/admin.js')
+const queries = require('../modules/queries')
+
 const getDefaultTemplateData = require('../helpers').getDefaultTemplateData
+
+const elasticsearch = require('elasticsearch')
 
 // Note: '*' will whitelist all domains.
 // If we remove the auth, we may want to lock this down.
@@ -252,43 +257,121 @@ if (configObj.get('auth0') !== null) {
 //  All the graphQL stuff
 //
 // ############################################################################
+
 //  This is the resolver
 const root = {
   hello: () => {
     return `world`
+  },
+  instances: (args, context) => {
+    /* eslint-disable import/no-unresolved */
+    return queries.instances.getInstances(args, context, undefined, true)
+  },
+  createInstance: (args, context) => {
+    /* eslint-disable import/no-unresolved */
+    return queries.instances.createInstance(args, context)
   }
 }
 
+//  This figures out a bunch of stuff around which queries we can run
+//  and the user context
 const getGrpObj = (isPlayground, userRoles, token) => {
   const grpObj = {
-    schema: buildSchema(schemaPublic.schema),
     rootValue: root,
     context: {
+      userRoles,
       token
     },
     userRoles,
     graphiql: isPlayground
   }
+
+  //  We load up a different schema for the end user based on their role
+  //  If they are an admin user, then they get the admin scheme, if they
+  //  are a normal user then they get the public schema. This way we
+  //  don't leak private/admin data
+  if (userRoles && userRoles.isAdmin && userRoles.isAdmin === true) {
+    grpObj.schema = buildSchema(schemaAdmin.schema)
+  } else {
+    grpObj.schema = buildSchema(schemaPublic.schema)
+  }
+
   return grpObj
 }
 
-const getRoles = async (token) => {
+//  This gets the user with the current token from either global cache
+//  or from the database.
+const getUser = async (token) => {
+  //  Now check in the globals to see if we have it
+  if (global.tokens && token in global.tokens) {
+    //  If the check is still in the expires limit the just use it
+    if (new Date().getTime() < global.tokens[token].expires) {
+      return global.tokens[token]
+    }
+  }
+
+  //  If we didn't have it, then we need to look up the user in the database
+  const esclient = new elasticsearch.Client({
+    host: process.env.ELASTICSEARCH
+  })
+  const index = `users_${process.env.KEY}`
+  const exists = await esclient.indices.exists({
+    index
+  })
+  if (exists === false) return {}
+  let records = null
+  try {
+    records = await esclient.search({
+      index,
+      body: {
+        query: {
+          term: {
+            apitoken: token
+          }
+        }
+      }
+    })
+  } catch (er) {
+    console.log(er)
+  }
+
+  //  If we got a record then grab the user, set the expiry times
+  //  and pop it into the global cache
+  if (records && records.hits && records.hits.hits) {
+    const user = records.hits.hits[0]._source
+    user.expires = new Date().getTime() + (1000 * 60 * 60)
+    if (!global.tokens) global.tokens = {}
+    global.tokens[user.apitoken] = user
+    return user
+  }
+
+  //  If we got here then we didn't find anyone return null
   return {}
 }
 
+//  If we are doing a direct query we need to grab the token from
+//  the headers, then call the function
 router.use('/graphql', bodyParser.json(), expressGraphql(async (req) => {
   let token = null
   if (req && req.headers && req.headers.authorization) {
     const tokenSplit = req.headers.authorization.split(' ')
     if (tokenSplit[1]) token = tokenSplit[1]
   }
-  const userRoles = await getRoles(token)
-  return (getGrpObj(false, userRoles, token))
+  //  grab the user from the token
+  const user = await getUser(token)
+  //  call the query method passing in the playground toggle, user roles and
+  //  token for tracking
+  return (getGrpObj(false, user.roles, token))
 }))
 
+//  If we are coming from the playground, then we pull the token from the URL
+//  then call the function
 router.use('/:token/playground', bodyParser.json(), expressGraphql(async (req) => {
-  const userRoles = await getRoles(req.params.token)
-  return (getGrpObj(true, userRoles, req.params.token))
+  //  grab the user from the token
+  const user = await getUser(req.params.token)
+  //  call the query method passing in the playground toggle, user roles and
+  //  token for tracking
+  return (getGrpObj(true, user.roles, req.params.token))
 }))
 
 // ############################################################################

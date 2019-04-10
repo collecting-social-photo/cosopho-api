@@ -1,5 +1,7 @@
+const base = require('./base.js')
+
 exports.schema = `
 type Query {
-  hello: String
+  ${base.query.hello}
 }
 `
