@@ -41,7 +41,8 @@ console.log(`server.js exists in this directory: ${rootDir}`.help)
  * Check to see if we have been passed in command line parameters to define
  * the port, host, environment and if we want to skip any build steps
  */
-const argOptionDefinitions = [{
+const argOptionDefinitions = [
+  {
     name: 'key',
     alias: 'k',
     default: true,
@@ -118,7 +119,10 @@ if (!argOptions) {
  * base everything else
  */
 if (argOptions && !argOptions.key) {
-  console.log(`\n\nYou must pass the 'key' parameter 'yarn start --key xxxxx' see the README.md for more details\n\n`.error)
+  console.log(
+    `\n\nYou must pass the 'key' parameter 'yarn start --key xxxxx' see the README.md for more details\n\n`
+      .error
+  )
   showHelp = true
 }
 
@@ -159,7 +163,9 @@ if (argOptions.port) process.env.PORT = argOptions.port
 if (argOptions.host) process.env.HOST = argOptions.host
 if (argOptions.env) process.env.NODE_ENV = argOptions.env
 if (argOptions.elastic) process.env.ELASTICSEARCH = argOptions.elastic
-if (argOptions.redirecthttps) process.env.REDIRECT_HTTPS = argOptions.redirecthttps
+if (argOptions.redirecthttps) {
+  process.env.REDIRECT_HTTPS = argOptions.redirecthttps
+}
 process.env.KEY = argOptions.key
 
 //  Here we are managing if we are going to skip the build step
@@ -256,7 +262,9 @@ if (skipBuild === false) {
 }
 
 //  Make sure the data directory exists
-if (!fs.existsSync(path.join(rootDir, 'data'))) fs.mkdirSync(path.join(rootDir, 'data'))
+if (!fs.existsSync(path.join(rootDir, 'data'))) {
+  fs.mkdirSync(path.join(rootDir, 'data'))
+}
 
 // ########################################################################
 /*
@@ -334,7 +342,7 @@ if (process.env.NODE_ENV === 'development') {
 
 const elasticsearch = require('elasticsearch')
 
-async function getConfig() {
+async function getConfig () {
   //  This is putting all the config into the global config object
   const esclient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH
@@ -369,7 +377,7 @@ async function getConfig() {
 const p = new Promise(function (resolve, reject) {
   resolve(getConfig())
 })
-p.then((res) => {
+p.then(res => {
   const express = require('express')
   const exphbs = require('express-handlebars')
   const bodyParser = require('body-parser')
@@ -425,7 +433,8 @@ p.then((res) => {
   const auth0 = config.get('auth0')
   if (auth0 !== null && auth0.AUTH0_CALLBACK_URL_API) {
     // Configure Passport to use Auth0
-    const strategy = new Auth0Strategy({
+    const strategy = new Auth0Strategy(
+      {
         domain: auth0.AUTH0_DOMAIN,
         clientID: auth0.AUTH0_CLIENT_ID,
         clientSecret: auth0.AUTH0_SECRET,
@@ -482,7 +491,7 @@ p.then((res) => {
       console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
       console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
       console.log('')
-      console.log('                 DON\'T PANIC'.bold)
+      console.log("                 DON'T PANIC".bold)
       console.log('')
       console.log('The server did not shut down properly last time'.warn)
       console.log('  please try starting it up again, everything'.warn)
@@ -511,7 +520,9 @@ p.then((res) => {
       // to pass over the handshake value
       if (!global.config.auth0) {
         opn(
-          `http://${process.env.HOST}:${process.env.PORT}?handshake=${config.get('handshake')}`
+          `http://${process.env.HOST}:${
+            process.env.PORT
+          }?handshake=${config.get('handshake')}`
         )
       } else {
         opn(`http://${process.env.HOST}:${process.env.PORT}`)
@@ -522,7 +533,7 @@ p.then((res) => {
     console.log(
       `
   >> Welcome to the API server, please visit the site however you have your host and ports setup to see it from the outside world`
-      .info
+        .info
     )
     if (!global.config.auth0) {
       console.log(
@@ -533,8 +544,8 @@ p.then((res) => {
       console.log('')
       console.log(
         '>> You can also find the value in the '.info +
-        'config.json'.bold.data +
-        ' file'.info
+          'config.json'.bold.data +
+          ' file'.info
       )
       console.log('')
     }
