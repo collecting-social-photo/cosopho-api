@@ -263,6 +263,10 @@ const root = {
   hello: () => {
     return `world`
   },
+  instance: (args, context) => {
+    /* eslint-disable import/no-unresolved */
+    return queries.instances.getInstance(args, context, undefined, true)
+  },
   instances: (args, context) => {
     /* eslint-disable import/no-unresolved */
     return queries.instances.getInstances(args, context, undefined, true)
@@ -270,6 +274,14 @@ const root = {
   createInstance: (args, context) => {
     /* eslint-disable import/no-unresolved */
     return queries.instances.createInstance(args, context)
+  },
+  updateInstance: (args, context) => {
+    /* eslint-disable import/no-unresolved */
+    return queries.instances.updateInstance(args, context)
+  },
+  deleteInstance: (args, context) => {
+    /* eslint-disable import/no-unresolved */
+    return queries.instances.deleteInstance(args, context)
   }
 }
 
