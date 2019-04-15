@@ -8,134 +8,80 @@
 
 <body>
 
-  <section class="hero is-primary is-bold">
-    <div class="hero-body">
-      <div class="container">
-        <h1 class="title capitalise is-1">
-          Initial Setup
-        </h1>
-        <h2 class="subtitle is-3">
-          This is where you enter the Auth0 information to get started
-        </h2>
+
+  <body>
+    <div class="docs-container off-canvas off-canvas-sidebar-show">
+      {{>nav}}
+
+      {{>sidebar}}
+
+      <div class="off-canvas-content">
+        <div class="docs-content" id="content">
+
+          <h1>Initial Setup</h1>
+          <h2>This is where you enter the Auth0 information to get started</h2>
+
+          <p>
+            To use this dashboard you should first set up and be familiar with
+            <a href="https://auth0.com/">Auth0</a> which will act as your authentication and allow users to register and
+            log into the dashboard. You as the
+            1st user will be an admin user, who will then control the roles and rights of new users who sign up.
+          </p>
+          <p>
+            Before you fill in the details in the form, please create an Auth0 account, create an application and then
+            use
+            the details
+            provided.
+          </p>
+          <p>
+            <form method="POST" enctype="multipart/form-data">
+              <div class="form-group">
+                <label class="form-label" for="AUTH0_DOMAIN">Auth0 domain</label>
+                <input class="form-input" type="text" name="AUTH0_DOMAIN" id="AUTH0_DOMAIN"
+                  value="{{auth0.AUTH0_DOMAIN}}" placeholder="domain.auth0.com" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="AUTH0_CLIENT_ID">Auth0 client ID</label>
+                <input class="form-input" type="text" name="AUTH0_CLIENT_ID" id="AUTH0_CLIENT_ID"
+                  value="{{auth0.AUTH0_CLIENT_ID}}" placeholder="abcdef0123456789" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="AUTH0_SECRET">Auth0 secret</label>
+                <input class="form-input" type="text" name="AUTH0_SECRET" id="AUTH0_SECRET"
+                  value="{{auth0.AUTH0_SECRET}}" placeholder="abcdef0123456789" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="AUTH0_CALLBACK_URL">Auth0 callback url</label>
+                <input class="form-input" type="text" name="AUTH0_CALLBACK_URL" id="AUTH0_CALLBACK_URL"
+                  value="{{auth0.AUTH0_CALLBACK_URL_API}}" placeholder="https://domain.com/callback" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="elasticsearch">Elastic Search</label>
+                <input class="form-input" type="text" name="elasticsearch" id="elasticsearch"
+                  placeholder="{{#ifEqual NODE_ENV 'development'}}http://localhost:9200{{else}}https://domain.com{{/ifEqual}}"
+                  value="{{ELASTICSEARCH}}">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="handshake">Handshake</label>
+                <input class="form-input" type="text" name="handshake" id="handshake" value="{{handshake}}"
+                  placeholder="Your handshake token" />
+              </div>
+
+              <div class="level">
+                <button class="btn btn-primary input-group-btn" type="submit" value="save" name="action">Save</button>
+              </div>
+            </form>
+          </p>
+
+        </div>
       </div>
     </div>
-  </section>
-
-  <section class="section">
-    <div class="container">
-
-      <h1 class="title">Auth0</h1>
-      <p>
-        To use this API server you should first set up and be familiar with
-        <a href="https://auth0.com/">Auth0</a> which will act as your authentication and allow users to register and
-        log into the API server. You as the
-        1st user will be an admin user, who will then control the roles and rights of new users who sign up.
-      </p>
-      <p>
-        Before you fill in the details in the form, please create an Auth0 account, create an application and then use
-        the details
-        provided.
-      </p>
-      <p>
-        <form method="POST">
-          <div class="field is-horizontal">
-            <div class="field-label is-normal">
-              <label class="label">Auth0 domain</label>
-            </div>
-            <div class="field-body">
-              <div class="field">
-                <p class="control">
-                  <input class="input" type="text" name="AUTH0_DOMAIN" value="" placeholder="domain.auth0.com" />
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="field is-horizontal">
-            <div class="field-label is-normal">
-              <label class="label">Auth0 client ID</label>
-            </div>
-            <div class="field-body">
-              <div class="field">
-                <p class="control">
-                  <input class="input" type="text" name="AUTH0_CLIENT_ID" value="" placeholder="abcdef0123456789" />
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="field is-horizontal">
-            <div class="field-label is-normal">
-              <label class="label">Auth0 secret</label>
-            </div>
-            <div class="field-body">
-              <div class="field">
-                <p class="control">
-                  <input class="input" type="text" name="AUTH0_SECRET" value="" placeholder="abcdef0123456789" />
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="field is-horizontal">
-            <div class="field-label is-normal">
-              <label class="label">Auth0 callback url</label>
-            </div>
-            <div class="field-body">
-              <div class="field">
-                <p class="control">
-                  <input class="input" type="text" name="AUTH0_CALLBACK_URL" value="" placeholder="https://domain.com/callback" />
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="field is-horizontal">
-            <div class="field-label is-normal">
-              <label class="label">Elastic Search</label>
-            </div>
-            <div class="field-body">
-              <div class="field">
-                <p class="control">
-                  <input class="input" type="text" name="elasticsearch" placeholder="{{#ifEqual NODE_ENV 'development'}}http://localhost:9200{{else}}https://domain.com{{/ifEqual}}"
-                    {{#if config.elasticsearch.host}} value="{{config.elasticsearch.host}}" {{/if}}>
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="field is-horizontal">
-            <div class="field-label is-normal">
-              <label class="label">Handshake</label>
-            </div>
-            <div class="field-body">
-              <div class="field">
-                <p class="control">
-                  <input class="input" type="text" name="handshake" value="{{handshake}}" placeholder="Your handshake token" />
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="level">
-            <div class="level-left">
-              <div class="level-item">&nbsp;</div>
-            </div>
-            <div class="level-right">
-              <div class="level-item">
-                <p class="control">
-                  <button class="button is-primary" type="submit" value="save" name="action">Save</button>
-                </p>
-              </div>
-            </div>
-          </div>
-        </form>
-      </p>
-
-    </div>
-  </section>
-
-  {{> tail}}
-</body>
+    {{>tail}}
+  </body>
 
 </html>

@@ -154,20 +154,20 @@ router.use(function (req, res, next) {
     // Check to see if values are being posted to us
     if (req.method === 'POST') {
       if (
-        'action' in req.body &&
-        'AUTH0_DOMAIN' in req.body &&
-        'AUTH0_CLIENT_ID' in req.body &&
-        'AUTH0_SECRET' in req.body &&
-        'AUTH0_CALLBACK_URL' in req.body &&
-        'handshake' in req.body &&
-        req.body.action === 'save' &&
-        req.body.handshake === handshake
+        'action' in req.fields &&
+        'AUTH0_DOMAIN' in req.fields &&
+        'AUTH0_CLIENT_ID' in req.fields &&
+        'AUTH0_SECRET' in req.fields &&
+        'AUTH0_CALLBACK_URL' in req.fields &&
+        'handshake' in req.fields &&
+        req.fields.action === 'save' &&
+        req.fields.handshake === handshake
       ) {
         const auth0 = {
-          AUTH0_DOMAIN: req.body.AUTH0_DOMAIN,
-          AUTH0_CLIENT_ID: req.body.AUTH0_CLIENT_ID,
-          AUTH0_SECRET: req.body.AUTH0_SECRET,
-          AUTH0_CALLBACK_URL_API: req.body.AUTH0_CALLBACK_URL
+          AUTH0_DOMAIN: req.fields.AUTH0_DOMAIN,
+          AUTH0_CLIENT_ID: req.fields.AUTH0_CLIENT_ID,
+          AUTH0_SECRET: req.fields.AUTH0_SECRET,
+          AUTH0_CALLBACK_URL_API: req.fields.AUTH0_CALLBACK_URL
         }
         configObj.set('auth0', auth0)
         setTimeout(() => {
@@ -184,6 +184,11 @@ router.use(function (req, res, next) {
     }
     if (handshake) {
       req.templateValues.handshake = handshake
+    }
+
+    //  Hand over the auth details
+    if (configObj.get('auth0')) {
+      req.templateValues.auth0 = configObj.get('auth0')
     }
 
     //  Set up a nice handy default callback if we are developing

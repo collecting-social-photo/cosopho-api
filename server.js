@@ -41,58 +41,57 @@ console.log(`server.js exists in this directory: ${rootDir}`.help)
  * Check to see if we have been passed in command line parameters to define
  * the port, host, environment and if we want to skip any build steps
  */
-const argOptionDefinitions = [
-  {
-    name: 'key',
-    alias: 'k',
-    default: true,
-    type: String
-  },
-  {
-    name: 'port',
-    alias: 'p',
-    type: Number
-  },
-  {
-    name: 'host',
-    alias: 't',
-    type: String
-  },
-  {
-    name: 'env',
-    alias: 'e',
-    type: String
-  },
-  {
-    name: 'elastic',
-    alias: 'l',
-    type: String
-  },
-  {
-    name: 'skipBuild',
-    alias: 's',
-    type: Boolean
-  },
-  {
-    name: 'buildOnly',
-    alias: 'b',
-    type: Boolean
-  },
-  {
-    name: 'skipOpen',
-    alias: 'o',
-    type: Boolean
-  },
-  {
-    name: 'redirecthttps',
-    alias: 'r',
-    type: Boolean
-  },
-  {
-    name: 'help',
-    alias: 'h',
-    type: String
-  }
+const argOptionDefinitions = [{
+  name: 'key',
+  alias: 'k',
+  default: true,
+  type: String
+},
+{
+  name: 'port',
+  alias: 'p',
+  type: Number
+},
+{
+  name: 'host',
+  alias: 't',
+  type: String
+},
+{
+  name: 'env',
+  alias: 'e',
+  type: String
+},
+{
+  name: 'elastic',
+  alias: 'l',
+  type: String
+},
+{
+  name: 'skipBuild',
+  alias: 's',
+  type: Boolean
+},
+{
+  name: 'buildOnly',
+  alias: 'b',
+  type: Boolean
+},
+{
+  name: 'skipOpen',
+  alias: 'o',
+  type: Boolean
+},
+{
+  name: 'redirecthttps',
+  alias: 'r',
+  type: Boolean
+},
+{
+  name: 'help',
+  alias: 'h',
+  type: String
+}
 ]
 
 /*
@@ -121,7 +120,7 @@ if (!argOptions) {
 if (argOptions && !argOptions.key) {
   console.log(
     `\n\nYou must pass the 'key' parameter 'yarn start --key xxxxx' see the README.md for more details\n\n`
-      .error
+    .error
   )
   showHelp = true
 }
@@ -380,6 +379,7 @@ const p = new Promise(function (resolve, reject) {
 p.then(res => {
   const express = require('express')
   const exphbs = require('express-handlebars')
+  const formidableMiddleware = require('express-formidable')
   const bodyParser = require('body-parser')
   const cookieParser = require('cookie-parser')
   const session = require('express-session')
@@ -408,6 +408,7 @@ p.then(res => {
     })
   )
   app.use(bodyParser.json())
+  app.use(formidableMiddleware())
   app.use(
     bodyParser.urlencoded({
       extended: true
@@ -433,13 +434,12 @@ p.then(res => {
   const auth0 = config.get('auth0')
   if (auth0 !== null && auth0.AUTH0_CALLBACK_URL_API) {
     // Configure Passport to use Auth0
-    const strategy = new Auth0Strategy(
-      {
-        domain: auth0.AUTH0_DOMAIN,
-        clientID: auth0.AUTH0_CLIENT_ID,
-        clientSecret: auth0.AUTH0_SECRET,
-        callbackURL: auth0.AUTH0_CALLBACK_URL_API
-      },
+    const strategy = new Auth0Strategy({
+      domain: auth0.AUTH0_DOMAIN,
+      clientID: auth0.AUTH0_CLIENT_ID,
+      clientSecret: auth0.AUTH0_SECRET,
+      callbackURL: auth0.AUTH0_CALLBACK_URL_API
+    },
       (accessToken, refreshToken, extraParams, profile, done) => {
         return done(null, profile)
       }
@@ -533,7 +533,7 @@ p.then(res => {
     console.log(
       `
   >> Welcome to the API server, please visit the site however you have your host and ports setup to see it from the outside world`
-        .info
+      .info
     )
     if (!global.config.auth0) {
       console.log(
@@ -544,8 +544,8 @@ p.then(res => {
       console.log('')
       console.log(
         '>> You can also find the value in the '.info +
-          'config.json'.bold.data +
-          ' file'.info
+        'config.json'.bold.data +
+        ' file'.info
       )
       console.log('')
     }
