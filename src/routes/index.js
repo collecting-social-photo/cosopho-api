@@ -83,7 +83,7 @@ router.use(function (req, res, next) {
   const defaultLang = 'en'
   let selectedLang = 'en'
 
-  if (req.session.user === undefined) {
+  if (req.session && req.session.user === undefined) {
     req.user = null
   } else {
     req.user = req.session.user
@@ -349,7 +349,7 @@ const getUser = async (token) => {
 
   //  If we got a record then grab the user, set the expiry times
   //  and pop it into the global cache
-  if (records && records.hits && records.hits.hits) {
+  if (records && records.hits && records.hits.hits && records.hits.hits.length === 1) {
     const user = records.hits.hits[0]._source
     user.expires = new Date().getTime() + (1000 * 60 * 60)
     if (!global.tokens) global.tokens = {}
