@@ -1,0 +1,90 @@
+@import "./variables";
+
+#sidebar {
+  background-color: $color-accent;
+  width: 15rem;
+  padding-top: 1rem;
+  height: 100%;
+  position: fixed;
+
+  .contacts-links {
+    background-color: $color-accent;
+  }
+
+  .menu {
+    padding: 0.4rem 0;
+  }
+
+  a,
+  .label-header {
+    font-size: .7rem;
+  }
+
+  a.terms-of-use {
+    font-size: 1rem;
+    font-weight: lighter;
+  }
+
+  label,
+  a {
+    color: white !important;
+    font-weight: lighter;
+  }
+
+  .accordion .accordion-header {
+    padding: 0;
+  }
+
+  label.content::after {
+    content: "\2304";
+    font-size: 1.4rem;
+  }
+
+  .menu-item {
+    font-size: .8rem;
+  }
+
+  .docs-brand {
+    top: 1.5rem;
+  }
+
+  .docs-brand .docs-logo img {
+    width: 100%;
+  }
+
+  .accordion {
+    margin-bottom: 0;
+  }
+
+  label.c-hand {
+    font-size: 1rem;
+    text-transform: none;
+  }
+
+  .docs-nav {
+    width: inherit;
+    top: 6rem;
+  }
+
+  .contacts-links {
+    position: fixed;
+    text-align: left;
+    bottom: 1.75rem;
+    padding: 0;
+    margin: 0;
+
+    a {
+      padding: 0.2rem 0;
+    }
+
+    a:hover {
+      background: inherit;
+      text-decoration: underline;
+    }
+
+    img.footer-logo {
+      max-width: 6rem;
+      margin-top: 0.5rem;
+    }
+  }
+}

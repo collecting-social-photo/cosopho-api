@@ -1,0 +1,17 @@
+.docs-navbar {
+  width: 100%;
+
+  .navbar-section {
+    position: fixed;
+    right: 1rem;
+    top: 1rem;
+  }
+
+  .pad-right {
+    padding-right: 1rem;
+  }
+}
+
+.off-canvas .off-canvas-content {
+  padding-top: 4rem !important;
+}
