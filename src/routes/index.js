@@ -194,6 +194,9 @@ router.use(function (req, res, next) {
     return res.render('config/auth0', req.templateValues)
   }
 
+  //  Send over the graphQL host
+  if (auth0.AUTH0_CALLBACK_URL_API) req.templateValues.graphQLHost = auth0.AUTH0_CALLBACK_URL_API.replace('/callback', '')
+
   next()
 })
 

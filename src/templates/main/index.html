@@ -1,12 +1,68 @@
 <html>
 
 <head>
-  <title>API Dashboard</title>
+  <title>GraphQL API server - documentation</title>
   {{> head}}
 </head>
 
 <body>
-  {{>nav}}
+  <div class="docs-container off-canvas off-canvas-sidebar-show">
+    {{>nav}}
+
+    {{>sidebar}}
+
+    <div class="off-canvas-content">
+      <div class="docs-content" id="content">
+
+        <div class="container" id="welcome">
+
+          {{#if user}}
+
+            <h3 id="apitoken">Your API Token</h3>
+            <p>
+              Below is your API developer token, this is the token you'll use to sign all your API calls. Always try to
+              keep your token private and out of public GitHub repositories.
+            </p>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title h1 text-center">API Token</div>
+                <div class="card-body h4 text-center">{{user.apitoken}}</div>
+              </div>
+            </div>
+
+            <hr class="my-4" />
+
+            <h3 id="endpoint">API Endpoint</h3>
+
+            <p>
+              Below is the GraphQL endpoint which you'll be making your API calls against. See below for more details on
+              how to structure calls.
+            </p>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title h1 text-center">GraphQL API Endpoint</div>
+                <div class="card-body h4 text-center"><code>{{graphQLHost}}/graphql</code></div>
+              </div>
+            </div>
+
+            <hr class="my-4" />
+
+            <h4 id="playground">GraphQL playground</h4>
+
+            <p>
+              Probably the easiest way to try out GraphQL queries is to use the playground which can be found here:
+              <a href="{{graphQLHost}}/{{user.apitoken}}/playground">{{graphQLHost}}/{{user.apitoken}}/playground</a>
+            </p>
+
+            <hr class="my-4">
+          {{else}}
+            You need to <a href="/login">log in</a> to view the documentation.
+          {{/if}}
+
+        </div>
+      </div>
+    </div>
+  </div>
   {{>tail}}
 </body>
 
