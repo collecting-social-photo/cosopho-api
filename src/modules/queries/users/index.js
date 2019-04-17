@@ -78,10 +78,10 @@ const getUsers = async (args, context, levelDown = 2, initialCall = false) => {
   users = users.map((user) => {
     const newRoles = {
       isAdmin: false,
-      isDev: false
+      isDeveloper: false
     }
     if (user.roles && user.roles.isAdmin) newRoles.isAdmin = user.roles.isAdmin
-    if (user.roles && user.roles.isDev) newRoles.isDev = user.roles.isDev
+    if (user.roles && user.roles.isDeveloper) newRoles.isDeveloper = user.roles.isDeveloper
     user.roles = newRoles
     return user
   })
@@ -177,7 +177,7 @@ const updateUser = async (args, context, levelDown = 2, initialCall = false) => 
   //  Update the user
   const newRoles = {}
   if ('isAdmin' in args) newRoles.isAdmin = args.isAdmin
-  if ('isDev' in args) newRoles.isDev = args.isDev
+  if ('isDeveloper' in args) newRoles.isDeveloper = args.isDeveloper
 
   const updatedUser = {
     id: args.id,

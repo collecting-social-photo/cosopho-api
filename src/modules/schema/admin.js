@@ -4,7 +4,7 @@ exports.schema = `
 
 type Roles {
   isAdmin: Boolean
-  isDev: Boolean
+  isDeveloper: Boolean
 }
 
 type Instance {
@@ -14,11 +14,14 @@ type Instance {
 
 type User {
   apitoken: String
+  created: String
+  displayName: String
+  icon: String
   id: String
+  instances: [Instance]
   lastLoggedIn: String
   lastUpdated: String
   roles: Roles
-  instances: [Instance]
 }
 
 type Query {
@@ -53,7 +56,7 @@ type Mutation {
     id: String!
     instances: [String]
     isAdmin: Boolean
-    isDev: Boolean
+    isDeveloper: Boolean
   ): User
 }
 
