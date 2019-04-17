@@ -1,3 +1,5 @@
+'use strict'
+
 const base = require('./base.js')
 
 exports.schema = `
@@ -7,9 +9,12 @@ type Roles {
   isDeveloper: Boolean
 }
 
+${base.type.initiative}
+
 type Instance {
   id: String!
   title: String
+  initiatives: [Initiative]
 }
 
 type User {
@@ -32,6 +37,10 @@ type Query {
   instance(
     id: String!
   ): Instance
+
+  ${base.query.initiative}
+  ${base.query.initiatives}
+
   users(
     ids: [String]
   ): [User]
@@ -52,6 +61,13 @@ type Mutation {
   deleteInstance(
     id: String!
   ): Instance
+
+  createInitiative(
+    title: String!
+    instance: String!
+    isActive: Boolean = true
+  ): Initiative
+
   updateUser(
     id: String!
     instances: [String]
@@ -59,5 +75,4 @@ type Mutation {
     isDeveloper: Boolean
   ): User
 }
-
 `

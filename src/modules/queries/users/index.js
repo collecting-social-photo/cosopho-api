@@ -155,11 +155,10 @@ const updateUser = async (args, context, levelDown = 2, initialCall = false) => 
   if (!context.userRoles || !context.userRoles.isAdmin || context.userRoles.isAdmin === false) return []
 
   if (!args.id) return null
-  if (!args.instances) return null
+  if (!args.instances && !('isAdmin' in args) && !('isDeveloper' in args)) return null
 
   //  Make sure the index exists
   creatIndex()
-
   const esclient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH
   })
@@ -184,6 +183,7 @@ const updateUser = async (args, context, levelDown = 2, initialCall = false) => 
     instances: newInstanceIds,
     roles: newRoles
   }
+
   await esclient.update({
     index,
     type,
