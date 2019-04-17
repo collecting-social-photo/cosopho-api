@@ -35,15 +35,49 @@ const getInstances = async (args, context, levelDown = 2, initialCall = false) =
     host: process.env.ELASTICSEARCH
   })
   const index = `instances_${process.env.KEY}`
-  let results = await esclient.search({
-    index
-  })
-  if (results.hits && results.hits.hits) {
-    const instances = results.hits.hits.map((instance) => instance._source)
-    return instances
+
+  const page = 0
+  const perPage = 200
+
+  //  This is the base query
+  const body = {
+    from: page * perPage,
+    size: perPage
   }
 
-  return []
+  //  These are things we must find
+  const must = []
+
+  //  If we are looking for a bunch of ids, then we do that here
+  if ('ids' in args && Array.isArray(args.ids)) {
+    must.push({
+      terms: {
+        'id.keyword': args.ids
+      }
+    })
+  }
+
+  //  If we have something with *must* do, then we add that
+  //  to the search
+  if (must.length > 0) {
+    body.query = {
+      bool: {
+        must
+      }
+    }
+  }
+
+  let results = await esclient.search({
+    index,
+    body
+  })
+
+  if (!results.hits || !results.hits.hits) {
+    return []
+  }
+
+  const instances = results.hits.hits.map((instance) => instance._source)
+  return instances
 }
 exports.getInstances = getInstances
 
@@ -53,32 +87,13 @@ exports.getInstances = getInstances
  *
  */
 const getInstance = async (args, context, levelDown = 2, initialCall = false) => {
-  //  Make sure the index exists
-  creatIndex()
+  const instance = await getInstances({
+    ids: [args.id]
+  }, context, levelDown, initialCall)
 
-  //  If we don't have an id
-  if (!args.id) return []
+  if (instance && instance.length === 1) return instance[0]
 
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
-  const index = `instances_${process.env.KEY}`
-  const type = 'instance'
-  let instance = null
-  try {
-    instance = await esclient.get({
-      index,
-      type,
-      id: args.id
-    })
-  } catch (er) {
-    return null
-  }
-
-  //  If we didn't get a match, return nothing
-  if (!instance.found || instance.found !== true || !instance._source) return null
-
-  return instance._source
+  return []
 }
 exports.getInstance = getInstance
 
@@ -87,7 +102,7 @@ exports.getInstance = getInstance
  * This writes a single instance
  *
  */
-const createInstance = async (args, context) => {
+const createInstance = async (args, context, levelDown = 2, initialCall = false) => {
   //  Make sure we are an admin user, as only admin users are allowed to create them
   if (!context.userRoles || !context.userRoles.isAdmin || context.userRoles.isAdmin === false) return []
 
@@ -139,7 +154,7 @@ exports.createInstance = createInstance
  * This updates a single instance
  *
  */
-const updateInstance = async (args, context) => {
+const updateInstance = async (args, context, levelDown = 2, initialCall = false) => {
   //  Make sure we are an admin user, as only admin users are allowed to create them
   if (!context.userRoles || !context.userRoles.isAdmin || context.userRoles.isAdmin === false) return []
 
@@ -182,7 +197,7 @@ exports.updateInstance = updateInstance
  * We actually have a lot of stuff to do here, checking if there are any users connected
  * to it, photos in it and so on
  */
-const deleteInstance = async (args, context) => {
+const deleteInstance = async (args, context, levelDown = 2, initialCall = false) => {
   //  Make sure we are an admin user, as only admin users are allowed to create them
   if (!context.userRoles || !context.userRoles.isAdmin || context.userRoles.isAdmin === false) return []
 

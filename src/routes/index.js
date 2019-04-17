@@ -267,30 +267,37 @@ if (configObj.get('auth0') !== null) {
 // ############################################################################
 
 //  This is the resolver
+/* eslint-disable import/no-unresolved */
 const root = {
   hello: () => {
     return `world`
   },
   instance: (args, context) => {
-    /* eslint-disable import/no-unresolved */
-    return queries.instances.getInstance(args, context, undefined, true)
+    return queries.instances.getInstance(args, context, 1, true)
   },
   instances: (args, context) => {
-    /* eslint-disable import/no-unresolved */
-    return queries.instances.getInstances(args, context, undefined, true)
+    return queries.instances.getInstances(args, context, 1, true)
   },
   createInstance: (args, context) => {
-    /* eslint-disable import/no-unresolved */
-    return queries.instances.createInstance(args, context)
+    return queries.instances.createInstance(args, context, 1, true)
   },
   updateInstance: (args, context) => {
-    /* eslint-disable import/no-unresolved */
-    return queries.instances.updateInstance(args, context)
+    return queries.instances.updateInstance(args, context, 1, true)
   },
   deleteInstance: (args, context) => {
-    /* eslint-disable import/no-unresolved */
-    return queries.instances.deleteInstance(args, context)
+    return queries.instances.deleteInstance(args, context, 1, true)
+  },
+
+  user: (args, context) => {
+    return queries.users.getUser(args, context, 1, true)
+  },
+  users: (args, context) => {
+    return queries.users.getUsers(args, context, 1, true)
+  },
+  updateUser: (args, context) => {
+    return queries.users.updateUser(args, context, 1, true)
   }
+
 }
 
 //  This figures out a bunch of stuff around which queries we can run
