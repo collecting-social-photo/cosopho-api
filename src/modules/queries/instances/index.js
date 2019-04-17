@@ -77,6 +77,12 @@ const getInstances = async (args, context, levelDown = 2, initialCall = false) =
   }
 
   const instances = results.hits.hits.map((instance) => instance._source)
+  for (const instance of instances) {
+    const initiatives = await queryInitiatives.getInitiatives({
+      instance: instance.id
+    })
+    instance.initiatives = initiatives
+  }
   return instances
 }
 exports.getInstances = getInstances
@@ -223,3 +229,5 @@ const deleteInstance = async (args, context, levelDown = 2, initialCall = false)
   return null
 }
 exports.deleteInstance = deleteInstance
+
+const queryInitiatives = require('../initiatives')

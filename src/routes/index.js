@@ -288,6 +288,16 @@ const root = {
     return queries.instances.deleteInstance(args, context, 1, true)
   },
 
+  initiative: (args, context) => {
+    return queries.initiatives.getInitiative(args, context, 1, true)
+  },
+  initiatives: (args, context) => {
+    return queries.initiatives.getInitiatives(args, context, 1, true)
+  },
+  createInitiative: (args, context) => {
+    return queries.initiatives.createInitiative(args, context, 1, true)
+  },
+
   user: (args, context) => {
     return queries.users.getUser(args, context, 1, true)
   },
