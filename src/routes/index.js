@@ -332,7 +332,6 @@ const getGrpObj = (isPlayground, userRoles, token) => {
   } else {
     grpObj.schema = buildSchema(schemaPublic.schema)
   }
-
   return grpObj
 }
 
@@ -394,10 +393,19 @@ router.use('/graphql', bodyParser.json(), expressGraphql(async (req) => {
     const tokenSplit = req.headers.authorization.split(' ')
     if (tokenSplit[1]) token = tokenSplit[1]
   }
+
   //  grab the user from the token
-  const user = await getUser(token)
-  //  call the query method passing in the playground toggle, user roles and
-  //  token for tracking
+  let user = await getUser(token)
+
+  //  If the token is the handshake, then we'll mark the user as an admin for
+  //  this call\
+  if (token === process.env.HANDSHAKE) {
+    user = {
+      roles: {
+        isAdmin: true
+      }
+    }
+  }
   return (getGrpObj(false, user.roles, token))
 }))
 
@@ -405,7 +413,17 @@ router.use('/graphql', bodyParser.json(), expressGraphql(async (req) => {
 //  then call the function
 router.use('/:token/playground', bodyParser.json(), expressGraphql(async (req) => {
   //  grab the user from the token
-  const user = await getUser(req.params.token)
+  let user = await getUser(req.params.token)
+
+  //  If the token is the handshake, then we'll mark the user as an admin for
+  //  this call
+  if (req.params.token === process.env.HANDSHAKE) {
+    user = {
+      roles: {
+        isAdmin: true
+      }
+    }
+  }
   //  call the query method passing in the playground toggle, user roles and
   //  token for tracking
   return (getGrpObj(true, user.roles, req.params.token))
