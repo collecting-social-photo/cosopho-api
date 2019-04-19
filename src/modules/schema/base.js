@@ -15,6 +15,7 @@ exports.query = {
   initiatives: `initiatives(
     ids: [String]
     instance: String!
+    isActive: Boolean
   ): [Initiative]`,
   initiative: `initiative(
     id: String

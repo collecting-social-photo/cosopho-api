@@ -76,7 +76,7 @@ type Mutation {
     id: String!
     instance: String!
     title: String
-    isActive: String
+    isActive: Boolean
   ): Initiative
   deleteInitiative(
     id: String!

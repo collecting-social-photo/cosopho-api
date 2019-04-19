@@ -75,6 +75,15 @@ const getInitiatives = async (args, context, levelDown = 2, initialCall = false)
     })
   }
 
+  //  If we filtering by active
+  if ('isActive' in args) {
+    must.push({
+      match: {
+        'isActive': args.isActive
+      }
+    })
+  }
+
   //  If we have something with *must* do, then we add that
   //  to the search
   if (must.length > 0) {
@@ -208,7 +217,7 @@ const updateInitiative = async (args, context, levelDown = 2, initialCall = fals
     id: args.id
   }
   if (args.title) updatedInitiative.title = args.title
-  if ('isActive' in args) updatedInitiative.isActive = args.title
+  if ('isActive' in args) updatedInitiative.isActive = args.isActive
 
   await esclient.update({
     index,
