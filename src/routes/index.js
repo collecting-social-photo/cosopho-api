@@ -297,6 +297,12 @@ const root = {
   createInitiative: (args, context) => {
     return queries.initiatives.createInitiative(args, context, 1, true)
   },
+  updateInitiative: (args, context) => {
+    return queries.initiatives.updateInitiative(args, context, 1, true)
+  },
+  deleteInitiative: (args, context) => {
+    return queries.initiatives.deleteInitiative(args, context, 1, true)
+  },
 
   user: (args, context) => {
     return queries.users.getUser(args, context, 1, true)

@@ -3,6 +3,7 @@
 exports.type = {
   initiative: `type Initiative {
     id: String!
+    slug: String
     title: String
     created: String
     instance: String!
@@ -14,9 +15,11 @@ exports.query = {
   initiatives: `initiatives(
     ids: [String]
     instance: String!
+    isActive: Boolean
   ): [Initiative]`,
   initiative: `initiative(
-    id: String!
+    id: String
+    slug: String
     instance: String!
   ): Initiative`
 }

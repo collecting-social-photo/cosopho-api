@@ -1,6 +1,7 @@
 const elasticsearch = require('elasticsearch')
 const utils = require('../../../modules/utils')
 const crypto = require('crypto')
+const delay = require('delay')
 
 /*
  *
@@ -148,10 +149,13 @@ const createInstance = async (args, context, levelDown = 2, initialCall = false)
     }
   })
 
-  return {
-    id,
-    title: args.title
-  }
+  await delay(2000)
+
+  //  Return back the values
+  const newUpdatedInstance = await getInstance({
+    id: id
+  }, context)
+  return newUpdatedInstance
 }
 exports.createInstance = createInstance
 
@@ -189,10 +193,13 @@ const updateInstance = async (args, context, levelDown = 2, initialCall = false)
     }
   })
 
-  return {
-    id: args.id,
-    title: args.title
-  }
+  await delay(2000)
+
+  //  Return back the values
+  const newUpdatedInstance = await getInstance({
+    id: args.id
+  }, context)
+  return newUpdatedInstance
 }
 exports.updateInstance = updateInstance
 
@@ -209,6 +216,19 @@ const deleteInstance = async (args, context, levelDown = 2, initialCall = false)
 
   if (!args.id) return null
 
+  //  Check to see if there are any initiatives connect to this instance
+  const initiatives = await queryInitiatives.getInitiatives({
+    instance: args.id
+  })
+  if (initiatives.length > 0) {
+    return {
+      status: 'Failed: Instance still contains initiatives',
+      success: false
+    }
+  }
+
+  //  Now we know there are no initiatives connected we can delete the instance
+
   //  Make sure the index exists
   creatIndex()
 
@@ -217,16 +237,27 @@ const deleteInstance = async (args, context, levelDown = 2, initialCall = false)
   })
   const index = `instances_${process.env.KEY}`
   const type = 'instance'
+
+  //  TODO: BEFORE WE DELETE THIS INITIATIVE WE NEED TO MAKE SURE
+  //  IT DOESN'T CONTAIN ANY PHOTOS. WE ALSO NEED A WAY TO MASS DELETE
+  //  ALL PHOTOS FROM AN INITIATIVE
   try {
     await esclient.delete({
       index,
       type,
       id: args.id
     })
+    return {
+      status: 'ok',
+      success: true
+    }
   } catch (er) {
-    return null
+    const response = JSON.parse(er.response)
+    return {
+      status: response.result,
+      success: false
+    }
   }
-  return null
 }
 exports.deleteInstance = deleteInstance
 
