@@ -4,6 +4,11 @@ const base = require('./base.js')
 
 exports.schema = `
 
+type Status {
+  status: String
+  success: Boolean
+}
+
 type Roles {
   isAdmin: Boolean
   isDeveloper: Boolean
@@ -60,13 +65,23 @@ type Mutation {
   ): Instance
   deleteInstance(
     id: String!
-  ): Instance
+  ): Status
 
   createInitiative(
     title: String!
     instance: String!
     isActive: Boolean = true
   ): Initiative
+  updateInitiative(
+    id: String!
+    instance: String!
+    title: String
+    isActive: String
+  ): Initiative
+  deleteInitiative(
+    id: String!
+    instance: String!
+  ): Status
 
   updateUser(
     id: String!

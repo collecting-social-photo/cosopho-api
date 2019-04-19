@@ -1,5 +1,6 @@
 const elasticsearch = require('elasticsearch')
 const utils = require('../../utils')
+const crypto = require('crypto')
 const delay = require('delay')
 
 /*
@@ -65,6 +66,15 @@ const getInitiatives = async (args, context, levelDown = 2, initialCall = false)
     })
   }
 
+  //  If we are looking for a bunch of ids, then we do that here
+  if ('slug' in args) {
+    must.push({
+      match: {
+        'slug.keyword': args.slug
+      }
+    })
+  }
+
   //  If we have something with *must* do, then we add that
   //  to the search
   if (must.length > 0) {
@@ -98,10 +108,13 @@ const getInitiative = async (args, context, levelDown = 2, initialCall = false) 
   //  If we haven't been passed an instance then reject it
   if (!args.instance) return null
 
-  const initiative = await getInitiatives({
-    ids: [args.id],
+  const newArgs = {
     instance: args.instance
-  }, context, levelDown, initialCall)
+  }
+  if (args.id) newArgs.ids = [args.id]
+  if (args.slug) newArgs.slug = args.slug
+
+  const initiative = await getInitiatives(newArgs, context, levelDown, initialCall)
 
   if (initiative && initiative.length === 1) return initiative[0]
 
@@ -123,8 +136,13 @@ const createInitiative = async (args, context, levelDown = 2, initialCall = fals
   if (!args.instance) return null
 
   //  Convert the title into a slug
-  const id = utils.slugify(args.title)
-
+  const slug = utils.slugify(args.title)
+  const slugTail = crypto
+    .createHash('md5')
+    .update(`${Math.random()}`)
+    .digest('hex')
+    .substring(0, 16)
+  const id = `${slug.substring(0, 12)}-${slugTail}`
   //  Make sure the index exists
   creatIndex()
 
@@ -136,6 +154,7 @@ const createInitiative = async (args, context, levelDown = 2, initialCall = fals
   const d = new Date()
   const newInitiative = {
     id,
+    slug,
     created: d,
     title: args.title,
     instance: args.instance,
@@ -174,8 +193,7 @@ const updateInitiative = async (args, context, levelDown = 2, initialCall = fals
   //  We must have an id and an instance
   if (!args.id) return null
   if (!args.instance) return null
-
-  //  Make sure we have either a title or an active flag
+  //  Make sure we have at least a title or an isActive flag
   if (!args.title && !('isActive' in args)) return null
 
   //  Make sure the index exists
@@ -212,3 +230,48 @@ const updateInitiative = async (args, context, levelDown = 2, initialCall = fals
   return newUpdatedInitiative
 }
 exports.updateInitiative = updateInitiative
+
+/*
+ *
+ * This deletes a single initiative
+ *
+ */
+const deleteInitiative = async (args, context, levelDown = 2, initialCall = false) => {
+  //  Make sure we are an admin user, as only admin users are allowed to create them
+  if (!context.userRoles || !context.userRoles.isAdmin || context.userRoles.isAdmin === false) return []
+
+  //  We must have an id and an instance
+  if (!args.id) return null
+  if (!args.instance) return null
+
+  //  Make sure the index exists
+  creatIndex()
+
+  const esclient = new elasticsearch.Client({
+    host: process.env.ELASTICSEARCH
+  })
+  const index = `initiatives_${process.env.KEY}`
+  const type = 'initiative'
+
+  //  TODO: BEFORE WE DELETE THIS INITIATIVE WE NEED TO MAKE SURE
+  //  IT DOESN'T CONTAIN ANY PHOTOS. WE ALSO NEED A WAY TO MASS DELETE
+  //  ALL PHOTOS FROM AN INITIATIVE
+  try {
+    await esclient.delete({
+      index,
+      type,
+      id: args.id
+    })
+    return {
+      status: 'ok',
+      success: true
+    }
+  } catch (er) {
+    const response = JSON.parse(er.response)
+    return {
+      status: response.result,
+      success: false
+    }
+  }
+}
+exports.deleteInitiative = deleteInitiative
