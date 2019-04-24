@@ -72,6 +72,7 @@ type Mutation {
     instance: String!
     description: String
     isActive: Boolean = true
+    isFeatured: Boolean = false
   ): Initiative
   updateInitiative(
     id: String!
@@ -79,6 +80,7 @@ type Mutation {
     title: String
     description: String
     isActive: Boolean
+    isFeatured: Boolean
   ): Initiative
   deleteInitiative(
     id: String!

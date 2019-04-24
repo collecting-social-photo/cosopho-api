@@ -84,6 +84,15 @@ const getInitiatives = async (args, context, levelDown = 2, initialCall = false)
     })
   }
 
+  //  If we filtering by featured
+  if ('isFeatured' in args) {
+    must.push({
+      match: {
+        'isFeatured': args.isFeatured
+      }
+    })
+  }
+
   //  If we have something with *must* do, then we add that
   //  to the search
   if (must.length > 0) {
@@ -168,7 +177,8 @@ const createInitiative = async (args, context, levelDown = 2, initialCall = fals
     title: args.title,
     description: args.description,
     instance: args.instance,
-    isActive: args.isActive
+    isActive: args.isActive,
+    isFeatured: args.isFeatured
   }
   await esclient.update({
     index,
@@ -203,8 +213,8 @@ const updateInitiative = async (args, context, levelDown = 2, initialCall = fals
   //  We must have an id and an instance
   if (!args.id) return null
   if (!args.instance) return null
-  //  Make sure we have at least a title or an isActive flag
-  if (!args.title && !('isActive' in args)) return null
+  //  Make sure we have at least a title, isFeatured or an isActive flag
+  if (!args.title && !('isActive' in args) && !('isFeatured' in args)) return null
 
   //  Make sure the index exists
   creatIndex()
@@ -220,6 +230,7 @@ const updateInitiative = async (args, context, levelDown = 2, initialCall = fals
   if (args.title) updatedInitiative.title = args.title
   if (args.description) updatedInitiative.description = args.description
   if ('isActive' in args) updatedInitiative.isActive = args.isActive
+  if ('isFeatured' in args) updatedInitiative.isFeatured = args.isFeatured
 
   await esclient.update({
     index,

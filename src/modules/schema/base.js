@@ -9,6 +9,7 @@ exports.type = {
     created: String
     instance: String!
     isActive: Boolean
+    isFeatured: Boolean
   }`
 }
 exports.query = {
@@ -17,6 +18,7 @@ exports.query = {
     ids: [String]
     instance: String!
     isActive: Boolean
+    isFeatured: Boolean
   ): [Initiative]`,
   initiative: `initiative(
     id: String
