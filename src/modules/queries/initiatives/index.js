@@ -166,6 +166,7 @@ const createInitiative = async (args, context, levelDown = 2, initialCall = fals
     slug,
     created: d,
     title: args.title,
+    description: args.description,
     instance: args.instance,
     isActive: args.isActive
   }
@@ -217,6 +218,7 @@ const updateInitiative = async (args, context, levelDown = 2, initialCall = fals
     id: args.id
   }
   if (args.title) updatedInitiative.title = args.title
+  if (args.description) updatedInitiative.description = args.description
   if ('isActive' in args) updatedInitiative.isActive = args.isActive
 
   await esclient.update({
