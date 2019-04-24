@@ -5,6 +5,7 @@ exports.type = {
     id: String!
     slug: String
     title: String
+    description: String
     created: String
     instance: String!
     isActive: Boolean

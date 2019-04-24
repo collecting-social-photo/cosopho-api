@@ -70,12 +70,14 @@ type Mutation {
   createInitiative(
     title: String!
     instance: String!
+    description: String
     isActive: Boolean = true
   ): Initiative
   updateInitiative(
     id: String!
     instance: String!
     title: String
+    description: String
     isActive: Boolean
   ): Initiative
   deleteInitiative(
