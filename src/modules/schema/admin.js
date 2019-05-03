@@ -39,6 +39,7 @@ type Person {
   instance: String!
   slug: String
   username: String
+  email: String
   avatar: String
 }
 
@@ -65,12 +66,14 @@ type Query {
     ids: [String]
     slugs: [String]
     usernames: [String]
+    emails: [String]
     instance: String!
   ): [Person]
   person(
     id: String
     slug: String
     username: String
+    email: String
     instance: String!
   ): Person
   loginPerson(
@@ -124,12 +127,14 @@ type Mutation {
     instance: String!
     username: String!
     hashedPassword: String!
+    email: String!
   ): Person
   updatePerson(
     id: String!
     instance: String!
     username: String
     hashedPassword: String
+    email: String
   ): Person
   deletePerson(
     id: String!

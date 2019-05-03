@@ -74,6 +74,14 @@ const getPeople = async (args, context, levelDown = 2, initialCall = false) => {
     })
   }
 
+  if ('emails' in args && Array.isArray(args.emails)) {
+    must.push({
+      terms: {
+        'email.keyword': args.emails
+      }
+    })
+  }
+
   //  If we have something with *must* do, then we add that
   //  to the search
   if (must.length > 0) {
@@ -108,7 +116,8 @@ const getPerson = async (args, context, levelDown = 2, initialCall = false) => {
   if (args.id) newArgs.ids = [args.id]
   if (args.slug) newArgs.slugs = [args.slug]
   if (args.username) newArgs.usernames = [args.username]
-  if (!args.id && !args.slug && !args.username) return []
+  if (args.email) newArgs.emails = [args.email]
+  if (!args.id && !args.slug && !args.username && !args.email) return []
 
   const person = await getPeople(newArgs, context, levelDown, initialCall)
   if (person && person.length === 1) return person[0]
@@ -127,7 +136,7 @@ const createPerson = async (args, context, levelDown = 2, initialCall = false) =
   if (!context.userRoles || !context.userRoles.isAdmin || context.userRoles.isAdmin === false) return []
 
   //  Make sure we have a username and password
-  if (!args.username || !args.hashedPassword) return null
+  if (!args.username || !args.email || !args.hashedPassword) return null
 
   const slug = utils.slugify(args.username).substring(0, 36)
 
@@ -149,6 +158,7 @@ const createPerson = async (args, context, levelDown = 2, initialCall = false) =
   const newPerson = {
     id: slug,
     slug,
+    email: args.email,
     username: args.username,
     hashedPassword,
     instance: args.instance,
