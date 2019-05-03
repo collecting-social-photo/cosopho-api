@@ -312,6 +312,19 @@ const root = {
   },
   updateUser: (args, context) => {
     return queries.users.updateUser(args, context, 1, true)
+  },
+
+  person: (args, context) => {
+    return queries.people.getPerson(args, context, 1, true)
+  },
+  people: (args, context) => {
+    return queries.people.getPeople(args, context, 1, true)
+  },
+  createPerson: (args, context) => {
+    return queries.people.createPerson(args, context, 1, true)
+  },
+  loginPerson: (args, context) => {
+    return queries.people.loginPerson(args, context, 1, true)
   }
 
 }

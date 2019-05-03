@@ -34,6 +34,14 @@ type User {
   roles: Roles
 }
 
+type Person {
+  id: String!
+  instance: String!
+  slug: String
+  username: String
+  avatar: String
+}
+
 type Query {
   ${base.query.hello}
   instances(
@@ -52,6 +60,24 @@ type Query {
   user(
     id: String!
   ): User
+
+  people(
+    ids: [String]
+    slugs: [String]
+    usernames: [String]
+    instance: String!
+  ): [Person]
+  person(
+    id: String
+    slug: String
+    username: String
+    instance: String!
+  ): Person
+  loginPerson(
+    username: String!
+    hashedPassword: String!
+    instance: String!
+  ): Status
 }
 
 
@@ -93,5 +119,21 @@ type Mutation {
     isAdmin: Boolean
     isDeveloper: Boolean
   ): User
+
+  createPerson(
+    instance: String!
+    username: String!
+    hashedPassword: String!
+  ): Person
+  updatePerson(
+    id: String!
+    instance: String!
+    username: String
+    hashedPassword: String
+  ): Person
+  deletePerson(
+    id: String!
+    instance: String!
+  ): Status
 }
 `
