@@ -1,6 +1,6 @@
-// const elasticsearch = require('elasticsearch')
+const elasticsearch = require('elasticsearch')
 // const utils = require('../../../modules/utils')
-// const crypto = require('crypto')
+const crypto = require('crypto')
 // const delay = require('delay')
 
 /*
@@ -8,7 +8,6 @@
  * Make sure the actual index exists
  *
  */
-/*
 const creatIndex = async () => {
   const esclient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH
@@ -23,7 +22,6 @@ const creatIndex = async () => {
     })
   }
 }
-*/
 
 /*
  *
@@ -87,8 +85,50 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
   }, context)
   if (!checkPerson) return null
 
-  console.log('Passed all the checks')
-  return null
+  const newId = crypto
+    .createHash('sha512')
+    .update(`${Math.random()}-${process.env.KEY}-${args.instance}`)
+    .digest('hex')
+    .slice(0, 36)
+
+  //  Make sure the index exists
+  creatIndex()
+
+  //  Default photo
+  const newPhoto = {
+    id: newId,
+    instance: args.instance,
+    initiative: args.initiative,
+    title: args.title,
+    personId: args.personId,
+    reviewed: false,
+    approved: false,
+    uploaded: new Date()
+  }
+  //  Extra things
+  if (args.tags) newPhoto.tags = args.tags
+  if (args.location) newPhoto.location = args.location
+  if (args.date) newPhoto.date = new Date(args.date)
+  if (args.socialMedias) newPhoto.socialMedias = args.socialMedias
+  if (args.license) newPhoto.license = args.license
+
+  //  Do some EXIF stuff here if we can
+  const esclient = new elasticsearch.Client({
+    host: process.env.ELASTICSEARCH
+  })
+  const index = `photos_${process.env.KEY}`
+  const type = 'photo'
+  await esclient.update({
+    index,
+    type,
+    id: newId,
+    body: {
+      doc: newPhoto,
+      doc_as_upsert: true
+    }
+  })
+
+  return newPhoto
 }
 exports.createPhoto = createPhoto
 

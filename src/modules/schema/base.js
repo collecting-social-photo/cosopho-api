@@ -42,6 +42,7 @@ exports.type = {
     aperture: Float
     shutterSpeed: Float
     license: String
+    uploaded: String
     person: Person
   `
 }
