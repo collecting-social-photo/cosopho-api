@@ -122,7 +122,7 @@ const getPerson = async (args, context, levelDown = 2, initialCall = false) => {
   const person = await getPeople(newArgs, context, levelDown, initialCall)
   if (person && person.length === 1) return person[0]
 
-  return []
+  return null
 }
 exports.getPerson = getPerson
 
@@ -137,6 +137,24 @@ const createPerson = async (args, context, levelDown = 2, initialCall = false) =
 
   //  Make sure we have a username and password
   if (!args.username || !args.email || !args.hashedPassword) return null
+
+  //  Check to see if the username already exists
+  const usernameUser = await getPerson({
+    username: args.username,
+    instance: args.instance
+  }, context)
+  if (usernameUser) {
+    return null
+  }
+
+  //  Check to see if the username already exists
+  const emailUser = await getPerson({
+    email: args.email,
+    instance: args.instance
+  }, context)
+  if (emailUser) {
+    return null
+  }
 
   const slug = utils.slugify(args.username).substring(0, 36)
 

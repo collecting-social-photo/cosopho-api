@@ -10,7 +10,22 @@ exports.type = {
     instance: String!
     isActive: Boolean
     isFeatured: Boolean
-  }`
+  }`,
+
+  personInner: `
+    id: String!
+    instance: String!
+    slug: String
+    username: String
+    avatar: String
+    name: String
+    gender: String
+    facebook: String
+    instagram: String
+    twitter: String
+    personalSite: String
+    bio: String
+  `
 }
 exports.query = {
   hello: `hello: String`,

@@ -6,11 +6,7 @@ exports.schema = `
 
 ${base.type.initiative}
 type Person {
-  id: String!
-  instance: String!
-  slug: String
-  username: String
-  avatar: String
+  ${base.type.personInner}
 }
 
 type Query {

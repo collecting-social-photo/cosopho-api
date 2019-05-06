@@ -35,12 +35,10 @@ type User {
 }
 
 type Person {
-  id: String!
-  instance: String!
-  slug: String
-  username: String
+  ${base.type.personInner}
   email: String
-  avatar: String
+  dateOfBirth: String
+  placeOfBirth: String
 }
 
 type Query {
