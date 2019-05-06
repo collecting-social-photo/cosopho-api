@@ -325,6 +325,16 @@ const root = {
   },
   loginPerson: (args, context) => {
     return queries.people.loginPerson(args, context, 1, true)
+  },
+
+  photo: (args, context) => {
+    return queries.photos.photo(args, context, 1, true)
+  },
+  photos: (args, context) => {
+    return queries.photos.photos(args, context, 1, true)
+  },
+  createPhoto: (args, context) => {
+    return queries.photos.createPhoto(args, context, 1, true)
   }
 
 }

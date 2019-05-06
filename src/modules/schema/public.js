@@ -9,6 +9,10 @@ type Person {
   ${base.type.personInner}
 }
 
+type Photo {
+  ${base.type.photoInner}
+}
+
 type Query {
   ${base.query.hello}
 
@@ -27,6 +31,16 @@ type Query {
     username: String
     instance: String!
   ): Person
+
+  photos(
+    ids: [String]!
+    instance: String!
+    ${base.query.photosInner}
+  )
+  photo(
+    id: String!
+    instance: String!
+  ): Photo
 
 }
 `

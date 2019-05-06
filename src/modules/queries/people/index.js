@@ -128,6 +128,19 @@ exports.getPerson = getPerson
 
 /*
  *
+ * This checks a single person
+ *
+ */
+const checkPerson = async (args, context) => {
+  context.checkOnly = true
+  const person = await getPerson(args, context)
+  if (person) return true
+  return false
+}
+exports.checkPerson = checkPerson
+
+/*
+ *
  * This writes a single person
  *
  */
@@ -136,7 +149,9 @@ const createPerson = async (args, context, levelDown = 2, initialCall = false) =
   if (!context.userRoles || !context.userRoles.isAdmin || context.userRoles.isAdmin === false) return []
 
   //  Make sure we have a username and password
-  if (!args.username || !args.email || !args.hashedPassword) return null
+  if (!args.username || !args.instance || !args.email || !args.hashedPassword) return null
+
+  //  TODO: Check the instance exists
 
   //  Check to see if the username already exists
   const usernameUser = await getPerson({
