@@ -173,5 +173,22 @@ type Mutation {
     shutterSpeed: Float
     license: String
   ): Photo
+  updatePhoto(
+    id: String!
+    instance: String!
+    title: String
+    story: String
+    tags: [String]
+    location: String
+    date: String
+    socialMedias: [String]
+    make: String
+    model: String
+    aperture: Float
+    shutterSpeed: Float
+    license: String
+    reviewed: Boolean
+    approved: Boolean
+  ): Photo
 }
 `

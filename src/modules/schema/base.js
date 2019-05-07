@@ -31,6 +31,7 @@ exports.type = {
   photoInner: `
     id: String!
     instance: String!
+    initiative: String
     title: String
     story: String
     tags: [String]
@@ -63,7 +64,7 @@ exports.query = {
 
   photosInner: `
     tags: [String]
-    locations: String
+    location: String
     fromDate: String
     endDate: String
     socialMedias: [String]
@@ -73,7 +74,7 @@ exports.query = {
     aperture: Float
     shutterSpeed: Float
     license: String
-    peopleIds: [String]
+    peopleSlugs: [String]
   `,
   photoInner: `
     id: String!

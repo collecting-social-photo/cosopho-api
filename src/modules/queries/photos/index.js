@@ -1,7 +1,7 @@
 const elasticsearch = require('elasticsearch')
 // const utils = require('../../../modules/utils')
 const crypto = require('crypto')
-// const delay = require('delay')
+const delay = require('delay')
 
 /*
  *
@@ -29,10 +29,162 @@ const creatIndex = async () => {
  *
  */
 const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
-  console.log('in getPhotos')
-  return []
+  //  Make sure the index exists
+  creatIndex()
+
+  const esclient = new elasticsearch.Client({
+    host: process.env.ELASTICSEARCH
+  })
+  const index = `photos_${process.env.KEY}`
+
+  const page = 0
+  const perPage = 200
+
+  //  This is the base query
+  const body = {
+    from: page * perPage,
+    size: perPage
+  }
+
+  //  These are things we must find
+  const must = []
+
+  //  If we are looking for a bunch of ids, then we do that here
+  if ('ids' in args && Array.isArray(args.ids)) {
+    must.push({
+      terms: {
+        'id': args.ids
+      }
+    })
+  }
+
+  if ('tags' in args && Array.isArray(args.tags)) {
+    must.push({
+      terms: {
+        'tags': args.tags
+      }
+    })
+  }
+
+  if ('location' in args && args.location !== '') {
+    must.push({
+      match: {
+        'location': args.location
+      }
+    })
+  }
+
+  if ('socialMedias' in args && Array.isArray(args.socialMedias)) {
+    must.push({
+      terms: {
+        'socialMedias': args.socialMedias
+      }
+    })
+  }
+
+  if ('initiative' in args && args.initiative !== '') {
+    must.push({
+      match: {
+        'initiative': args.initiative
+      }
+    })
+  }
+
+  if ('instance' in args && args.instance !== '') {
+    must.push({
+      match: {
+        'instance': args.instance
+      }
+    })
+  }
+
+  if ('make' in args && args.make !== '') {
+    must.push({
+      match: {
+        'make': args.make
+      }
+    })
+  }
+
+  if ('model' in args && args.model !== '') {
+    must.push({
+      match: {
+        'model': args.model
+      }
+    })
+  }
+
+  if ('aperture' in args) {
+    must.push({
+      match: {
+        'aperture': args.aperture
+      }
+    })
+  }
+
+  if ('shutterSpeed' in args) {
+    must.push({
+      match: {
+        'shutterSpeed': args.shutterSpeed
+      }
+    })
+  }
+
+  if ('license' in args) {
+    must.push({
+      match: {
+        'license': args.license
+      }
+    })
+  }
+
+  if ('peopleSlugs' in args && Array.isArray(args.peopleSlugs)) {
+    must.push({
+      terms: {
+        'personSlug': args.peopleSlugs
+      }
+    })
+  }
+
+  if ('reviewed' in args) {
+    must.push({
+      match: {
+        'reviewed': args.reviewed
+      }
+    })
+  }
+
+  if ('approved' in args) {
+    must.push({
+      match: {
+        'approved': args.approved
+      }
+    })
+  }
+
+  //  If we have something with *must* do, then we add that
+  //  to the search
+  if (must.length > 0) {
+    body.query = {
+      bool: {
+        must
+      }
+    }
+  }
+
+  let results = await esclient.search({
+    index,
+    body
+  })
+
+  if (!results.hits || !results.hits.hits) {
+    return []
+  }
+
+  const photos = results.hits.hits.map((photo) => photo._source)
+  return photos
 }
-exports.getPeople = getPhotos
+exports.getPhotos = getPhotos
 
 /*
  *
@@ -40,10 +192,9 @@ exports.getPeople = getPhotos
  *
  */
 const getPhoto = async (args, context, levelDown = 2, initialCall = false) => {
-  console.log('In getPhoto')
   const newArgs = {}
   if (args.id) newArgs.ids = [args.id]
-  if (args.instance) newArgs.instance = [args.instance]
+  if (args.instance) newArgs.instance = args.instance
 
   const photo = await getPhotos(newArgs, context, levelDown, initialCall)
   if (photo && photo.length === 1) return photo[0]
@@ -58,7 +209,6 @@ exports.getPhoto = getPhoto
  *
  */
 const createPhoto = async (args, context, levelDown = 2, initialCall = false) => {
-  console.log('In createPhoto')
   //  Make sure we are an admin user, as only admin users are allowed to create them
   if (!context.userRoles || !context.userRoles.isAdmin || context.userRoles.isAdmin === false) return []
 
@@ -136,6 +286,82 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
   return newPhoto
 }
 exports.createPhoto = createPhoto
+
+/*
+ *
+ * This updates a single photo
+ *
+ */
+const updatePhoto = async (args, context, levelDown = 2, initialCall = false) => {
+  //  Make sure we are an admin user, as only admin users are allowed to create them
+  if (!context.userRoles || !context.userRoles.isAdmin || context.userRoles.isAdmin === false) return []
+
+  //  We must have an id
+  if (!args.id) return null
+  if (!args.instance) return null
+
+  //  Check the instance exists
+  const checkInstance = await instances.checkInstance({
+    id: args.instance
+  }, context)
+  if (!checkInstance) return null
+
+  //  Make sure the index exists
+  creatIndex()
+
+  const esclient = new elasticsearch.Client({
+    host: process.env.ELASTICSEARCH
+  })
+  const index = `photos_${process.env.KEY}`
+  const type = 'photo'
+  const updatedPhoto = {
+    id: args.id
+  }
+
+  //  These are the fields that can be updated
+  const keys = ['title',
+    'story',
+    'tags',
+    'location',
+    'date',
+    'socialMedias',
+    'make',
+    'model',
+    'aperture',
+    'shutterSpeed',
+    'license',
+    'reviewed',
+    'approved'
+  ]
+
+  //  Check to see if we have a new value, if so add it to the update record obj
+  keys.forEach((key) => {
+    if (key in args) {
+      updatedPhoto[key] = args[key]
+    }
+  })
+
+  //  Update the thing
+  await esclient.update({
+    index,
+    type,
+    id: args.id,
+    body: {
+      doc: updatedPhoto,
+      doc_as_upsert: true
+    }
+  })
+
+  await delay(2000)
+
+  //  Return back the values
+  const newUpdatedPhoto = await getPhoto({
+    id: args.id,
+    instance: args.instance
+  }, context)
+  return newUpdatedPhoto
+}
+exports.updatePhoto = updatePhoto
 
 const initiatives = require('../initiatives')
 const instances = require('../instances')

@@ -328,13 +328,16 @@ const root = {
   },
 
   photo: (args, context) => {
-    return queries.photos.photo(args, context, 1, true)
+    return queries.photos.getPhoto(args, context, 1, true)
   },
   photos: (args, context) => {
-    return queries.photos.photos(args, context, 1, true)
+    return queries.photos.getPhotos(args, context, 1, true)
   },
   createPhoto: (args, context) => {
     return queries.photos.createPhoto(args, context, 1, true)
+  },
+  updatePhoto: (args, context) => {
+    return queries.photos.updatePhoto(args, context, 1, true)
   }
 
 }
