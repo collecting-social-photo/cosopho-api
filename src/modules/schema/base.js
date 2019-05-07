@@ -36,7 +36,7 @@ exports.type = {
     tags: [String]
     location: String
     date: String
-    socialMedia: [String]
+    socialMedias: [String]
     make: String
     model: String
     aperture: Float

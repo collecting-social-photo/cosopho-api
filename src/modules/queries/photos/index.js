@@ -63,7 +63,7 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
   if (!context.userRoles || !context.userRoles.isAdmin || context.userRoles.isAdmin === false) return []
 
   //  Make sure we have an instance and title
-  if (!args.instance || !args.personId || !args.initiative || !args.title) return null
+  if (!args.instance || !args.personSlug || !args.initiative || !args.title) return null
 
   //  Check the instance exists
   const checkInstance = await instances.checkInstance({
@@ -80,7 +80,7 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
 
   //  Check the user exists
   const checkPerson = await people.checkPerson({
-    id: args.personId,
+    slug: args.personSlug,
     instance: args.instance
   }, context)
   if (!checkPerson) return null
@@ -100,7 +100,7 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
     instance: args.instance,
     initiative: args.initiative,
     title: args.title,
-    personId: args.personId,
+    personSlug: args.personSlug,
     reviewed: false,
     approved: false,
     uploaded: new Date()
@@ -108,9 +108,14 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
   //  Extra things
   if (args.tags) newPhoto.tags = args.tags
   if (args.location) newPhoto.location = args.location
+  if (args.story) newPhoto.story = args.story
   if (args.date) newPhoto.date = new Date(args.date)
   if (args.socialMedias) newPhoto.socialMedias = args.socialMedias
   if (args.license) newPhoto.license = args.license
+  if (args.make) newPhoto.make = args.make
+  if (args.model) newPhoto.model = args.model
+  if (args.aperture) newPhoto.aperture = args.aperture
+  if (args.shutterSpeed) newPhoto.shutterSpeed = args.shutterSpeed
 
   //  Do some EXIF stuff here if we can
   const esclient = new elasticsearch.Client({

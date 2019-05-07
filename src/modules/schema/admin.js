@@ -159,8 +159,9 @@ type Mutation {
 
   createPhoto(
     instance: String!
-    personId: String!
+    personSlug: String!
     title: String!
+    story: String
     initiative: String!
     tags: [String]
     location: String
