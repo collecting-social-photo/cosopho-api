@@ -29,8 +29,6 @@ const creatIndex = async () => {
  *
  */
 const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
-  console.log('in getPhotos')
-
   //  Make sure the index exists
   creatIndex()
 

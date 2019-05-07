@@ -31,6 +31,7 @@ exports.type = {
   photoInner: `
     id: String!
     instance: String!
+    initiative: String
     title: String
     story: String
     tags: [String]
