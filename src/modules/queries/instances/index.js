@@ -78,12 +78,17 @@ const getInstances = async (args, context, levelDown = 2, initialCall = false) =
   }
 
   const instances = results.hits.hits.map((instance) => instance._source)
-  for (const instance of instances) {
-    const initiatives = await queryInitiatives.getInitiatives({
-      instance: instance.id
-    })
-    instance.initiatives = initiatives
+
+  //  If we are not only checking then go get more information
+  if (!context.checkOnly) {
+    for (const instance of instances) {
+      const initiatives = await queryInitiatives.getInitiatives({
+        instance: instance.id
+      })
+      instance.initiatives = initiatives
+    }
   }
+
   return instances
 }
 exports.getInstances = getInstances
@@ -97,12 +102,24 @@ const getInstance = async (args, context, levelDown = 2, initialCall = false) =>
   const instance = await getInstances({
     ids: [args.id]
   }, context, levelDown, initialCall)
-
   if (instance && instance.length === 1) return instance[0]
 
-  return []
+  return null
 }
 exports.getInstance = getInstance
+
+/*
+ *
+ * This checks for an instance
+ *
+ */
+const checkInstance = async (args, context) => {
+  context.checkOnly = true
+  const instance = await getInstance(args, context)
+  if (instance) return true
+  return false
+}
+exports.checkInstance = checkInstance
 
 /*
  *

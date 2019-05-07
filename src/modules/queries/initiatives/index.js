@@ -133,13 +133,24 @@ const getInitiative = async (args, context, levelDown = 2, initialCall = false) 
   if (args.slug) newArgs.slug = args.slug
 
   const initiative = await getInitiatives(newArgs, context, levelDown, initialCall)
-
   if (initiative && initiative.length === 1) return initiative[0]
 
   return null
 }
 exports.getInitiative = getInitiative
 
+/*
+ *
+ * This checks a single initiative
+ *
+ */
+const checkInitiative = async (args, context) => {
+  context.checkOnly = true
+  const initiative = await getInitiatives(args, context)
+  if (initiative) return true
+  return false
+}
+exports.checkInitiative = checkInitiative
 /*
  *
  * This writes a single initiative

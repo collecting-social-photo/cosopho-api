@@ -41,13 +41,19 @@ type Person {
   placeOfBirth: String
 }
 
+type Photo {
+  ${base.type.photoInner}
+  approved: Boolean
+  reviewed: Boolean
+}
+
 type Query {
   ${base.query.hello}
   instances(
     ids: [String]
   ): [Instance]
   instance(
-    id: String!
+    id: String
   ): Instance
 
   ${base.query.initiative}
@@ -72,13 +78,25 @@ type Query {
     slug: String
     username: String
     email: String
-    instance: String!
+    instance: String
   ): Person
   loginPerson(
     username: String!
     hashedPassword: String!
-    instance: String!
+    instance: String
   ): Status
+
+  photos(
+    ${base.query.photosInner}
+    ids: [String]
+    instance: String
+    reviewed: Boolean
+    approved: Boolean
+  ): [Photo]
+  photo(
+    id: String!
+    instance: String
+  ): Photo
 }
 
 
@@ -138,5 +156,22 @@ type Mutation {
     id: String!
     instance: String!
   ): Status
+
+  createPhoto(
+    instance: String!
+    personSlug: String!
+    title: String!
+    story: String
+    initiative: String!
+    tags: [String]
+    location: String
+    date: String
+    socialMedias: [String]
+    make: String
+    model: String
+    aperture: Float
+    shutterSpeed: Float
+    license: String
+  ): Photo
 }
 `

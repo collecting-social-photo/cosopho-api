@@ -25,19 +25,57 @@ exports.type = {
     twitter: String
     personalSite: String
     bio: String
+    photos: [Photo]
+  `,
+
+  photoInner: `
+    id: String!
+    instance: String!
+    title: String
+    story: String
+    tags: [String]
+    location: String
+    date: String
+    socialMedias: [String]
+    make: String
+    model: String
+    aperture: Float
+    shutterSpeed: Float
+    license: String
+    uploaded: String
+    person: Person
   `
 }
+
 exports.query = {
   hello: `hello: String`,
   initiatives: `initiatives(
     ids: [String]
-    instance: String!
     isActive: Boolean
     isFeatured: Boolean
+    instance: String!
   ): [Initiative]`,
   initiative: `initiative(
     id: String
     slug: String
     instance: String!
-  ): Initiative`
+  ): Initiative`,
+
+  photosInner: `
+    tags: [String]
+    locations: String
+    fromDate: String
+    endDate: String
+    socialMedias: [String]
+    initiative: String
+    make: String
+    model: String
+    aperture: Float
+    shutterSpeed: Float
+    license: String
+    peopleIds: [String]
+  `,
+  photoInner: `
+    id: String!
+  `
 }
