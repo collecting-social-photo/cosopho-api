@@ -113,6 +113,35 @@ const getInitiatives = async (args, context, levelDown = 2, initialCall = false)
   }
 
   const initiatives = results.hits.hits.map((initiative) => initiative._source)
+
+  //  Now we need to go and get all the photos for each initiative
+  if (levelDown < 2) {
+    const initiativeSlugs = initiatives.map((initiative) => initiative.slug)
+    const newArgs = {
+      instance: args.instance,
+      initiatives: initiativeSlugs
+    }
+
+    //  Grab any 'photo' filters we want to pass through
+    Object.entries(args).forEach((keyValue) => {
+      const key = keyValue[0]
+      const value = keyValue[1]
+      const keySplit = key.split('_')
+      if (keySplit.length === 2 && keySplit[0] === 'photos') newArgs[keySplit[1]] = value
+    })
+
+    const initiativePhotos = await photos.getPhotos(newArgs, context, levelDown)
+    if (initiativePhotos) {
+      initiativePhotos.forEach((photo) => {
+        initiatives.forEach((initiative) => {
+          if (initiative.slug === photo.initiative) {
+            if (!initiative.photos) initiative.photos = []
+            initiative.photos.push(photo)
+          }
+        })
+      })
+    }
+  }
   return initiatives
 }
 exports.getInitiatives = getInitiatives
@@ -308,3 +337,4 @@ const deleteInitiative = async (args, context, levelDown = 2, initialCall = fals
   }
 }
 exports.deleteInitiative = deleteInitiative
+const photos = require('../photos')

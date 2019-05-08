@@ -10,6 +10,7 @@ exports.type = {
     instance: String!
     isActive: Boolean
     isFeatured: Boolean
+    photos: [Photo]
   }`,
 
   personInner: `
@@ -50,17 +51,17 @@ exports.type = {
 
 exports.query = {
   hello: `hello: String`,
-  initiatives: `initiatives(
+  initiativesInner: `
     ids: [String]
     isActive: Boolean
     isFeatured: Boolean
     instance: String!
-  ): [Initiative]`,
-  initiative: `initiative(
+  `,
+  initiativeInner: `
     id: String
     slug: String
     instance: String!
-  ): Initiative`,
+  `,
 
   photosInner: `
     tags: [String]
@@ -68,7 +69,7 @@ exports.query = {
     fromDate: String
     endDate: String
     socialMedias: [String]
-    initiative: String
+    initiatives: [String]
     make: String
     model: String
     aperture: Float

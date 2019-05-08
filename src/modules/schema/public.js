@@ -16,8 +16,12 @@ type Photo {
 type Query {
   ${base.query.hello}
 
-  ${base.query.initiative}
-  ${base.query.initiatives}
+  initiatives(
+    ${base.query.initiativesInner}
+  ): [Initiative]
+  initiative(
+    ${base.query.initiativeInner}
+  ): Initiative
 
   people(
     ids: [String]
