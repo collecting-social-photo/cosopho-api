@@ -82,6 +82,14 @@ const getPeople = async (args, context, levelDown = 2, initialCall = false) => {
     })
   }
 
+  if ('instance' in args && args.instance !== '') {
+    must.push({
+      match: {
+        'instance.keyword': args.instance
+      }
+    })
+  }
+
   //  If we have something with *must* do, then we add that
   //  to the search
   if (must.length > 0) {
@@ -102,6 +110,27 @@ const getPeople = async (args, context, levelDown = 2, initialCall = false) => {
   }
 
   const people = results.hits.hits.map((person) => person._source)
+
+  //  Now we need to go and get all the photos for each person
+  if (levelDown < 2) {
+    const peopleSlugs = people.map((person) => person.slug)
+    const peoplePhotos = await photos.getPhotos({
+      instance: args.instance,
+      peopleSlugs: peopleSlugs,
+      approved: true
+    }, context)
+
+    if (peoplePhotos) {
+      peoplePhotos.forEach((photo) => {
+        people.forEach((person) => {
+          if (person.slug === photo.personSlug) {
+            if (!person.photos) person.photos = []
+            person.photos.push(photo)
+          }
+        })
+      })
+    }
+  }
   return people
 }
 exports.getPeople = getPeople
@@ -295,3 +324,4 @@ const loginPerson = async (args, context, levelDown = 2, initialCall = false) =>
 exports.loginPerson = loginPerson
 
 const instances = require('../instances')
+const photos = require('../photos')
