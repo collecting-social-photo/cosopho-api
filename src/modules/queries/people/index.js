@@ -82,6 +82,14 @@ const getPeople = async (args, context, levelDown = 2, initialCall = false) => {
     })
   }
 
+  if ('instance' in args && args.instance !== '') {
+    must.push({
+      match: {
+        'instance.keyword': args.instance
+      }
+    })
+  }
+
   //  If we have something with *must* do, then we add that
   //  to the search
   if (must.length > 0) {
@@ -102,6 +110,35 @@ const getPeople = async (args, context, levelDown = 2, initialCall = false) => {
   }
 
   const people = results.hits.hits.map((person) => person._source)
+
+  //  Now we need to go and get all the photos for each person
+  if (levelDown < 2) {
+    const peopleSlugs = people.map((person) => person.slug)
+    const newArgs = {
+      peopleSlugs: peopleSlugs
+    }
+
+    //  Grab any 'photo' filters we want to pass through
+    Object.entries(args).forEach((keyValue) => {
+      const key = keyValue[0]
+      const value = keyValue[1]
+      const keySplit = key.split('_')
+      if (keySplit.length === 2 && keySplit[0] === 'photos') newArgs[keySplit[1]] = value
+    })
+
+    const peoplePhotos = await photos.getPhotos(newArgs, context)
+
+    if (peoplePhotos) {
+      peoplePhotos.forEach((photo) => {
+        people.forEach((person) => {
+          if (person.slug === photo.personSlug) {
+            if (!person.photos) person.photos = []
+            person.photos.push(photo)
+          }
+        })
+      })
+    }
+  }
   return people
 }
 exports.getPeople = getPeople
@@ -118,6 +155,14 @@ const getPerson = async (args, context, levelDown = 2, initialCall = false) => {
   if (args.username) newArgs.usernames = [args.username]
   if (args.email) newArgs.emails = [args.email]
   if (!args.id && !args.slug && !args.username && !args.email) return []
+
+  //  Grab any 'photo' filters we want to pass through
+  Object.entries(args).forEach((keyValue) => {
+    const key = keyValue[0]
+    const value = keyValue[1]
+    const keySplit = key.split('_')
+    if (keySplit.length === 2 && keySplit[0] === 'photos') newArgs[key] = value
+  })
 
   const person = await getPeople(newArgs, context, levelDown, initialCall)
   if (person && person.length === 1) return person[0]
@@ -295,3 +340,4 @@ const loginPerson = async (args, context, levelDown = 2, initialCall = false) =>
 exports.loginPerson = loginPerson
 
 const instances = require('../instances')
+const photos = require('../photos')

@@ -56,8 +56,14 @@ type Query {
     id: String
   ): Instance
 
-  ${base.query.initiative}
-  ${base.query.initiatives}
+  initiatives(
+    ${base.query.initiativesInner}
+    photos_approved: Boolean
+  ): [Initiative]
+  initiative(
+    ${base.query.initiativeInner}
+    photos_approved: Boolean
+  ): Initiative
 
   users(
     ids: [String]
@@ -72,6 +78,7 @@ type Query {
     usernames: [String]
     emails: [String]
     instance: String!
+    photos_approved: Boolean
   ): [Person]
   person(
     id: String
@@ -79,6 +86,7 @@ type Query {
     username: String
     email: String
     instance: String
+    photos_approved: Boolean
   ): Person
   loginPerson(
     username: String!

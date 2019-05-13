@@ -61,7 +61,7 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   if ('tags' in args && Array.isArray(args.tags)) {
     must.push({
       terms: {
-        'tags': args.tags
+        'tags.keyword': args.tags
       }
     })
   }
@@ -77,15 +77,15 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   if ('socialMedias' in args && Array.isArray(args.socialMedias)) {
     must.push({
       terms: {
-        'socialMedias': args.socialMedias
+        'socialMedias.keyword': args.socialMedias
       }
     })
   }
 
-  if ('initiative' in args && args.initiative !== '') {
+  if ('initiatives' in args && Array.isArray(args.initiatives)) {
     must.push({
-      match: {
-        'initiative': args.initiative
+      terms: {
+        'initiative.keyword': args.initiatives
       }
     })
   }
@@ -154,6 +154,10 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     })
   }
 
+  //  For approved to be true if we are not any of the "admin/staff" roles.
+  if (!context.userRoles.isStaff && !context.userRoles.isVendor && !context.userRoles.isAdmin) {
+    args.approved = true
+  }
   if ('approved' in args) {
     must.push({
       match: {
@@ -182,6 +186,24 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   }
 
   const photos = results.hits.hits.map((photo) => photo._source)
+  //  Now we need to go and get all the people for these photos
+  if (levelDown < 2) {
+    const peopleSlugs = [...new Set(photos.map((photo) => photo.personSlug))] // unique array
+    const photosPeople = await people.getPeople({
+      instance: args.instance,
+      slugs: peopleSlugs
+    }, context)
+
+    if (photosPeople) {
+      photosPeople.forEach((person) => {
+        photos.forEach((photo) => {
+          if (photo.personSlug === person.slug) {
+            photo.person = person
+          }
+        })
+      })
+    }
+  }
   return photos
 }
 exports.getPhotos = getPhotos
