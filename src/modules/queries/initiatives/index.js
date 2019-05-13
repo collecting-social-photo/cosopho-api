@@ -161,6 +161,14 @@ const getInitiative = async (args, context, levelDown = 2, initialCall = false) 
   if (args.id) newArgs.ids = [args.id]
   if (args.slug) newArgs.slug = args.slug
 
+  //  Grab any 'photo' filters we want to pass through
+  Object.entries(args).forEach((keyValue) => {
+    const key = keyValue[0]
+    const value = keyValue[1]
+    const keySplit = key.split('_')
+    if (keySplit.length === 2 && keySplit[0] === 'photos') newArgs[key] = value
+  })
+
   const initiative = await getInitiatives(newArgs, context, levelDown, initialCall)
   if (initiative && initiative.length === 1) return initiative[0]
 

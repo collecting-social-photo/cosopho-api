@@ -115,7 +115,6 @@ const getPeople = async (args, context, levelDown = 2, initialCall = false) => {
   if (levelDown < 2) {
     const peopleSlugs = people.map((person) => person.slug)
     const newArgs = {
-      instance: args.instance,
       peopleSlugs: peopleSlugs
     }
 
@@ -156,6 +155,14 @@ const getPerson = async (args, context, levelDown = 2, initialCall = false) => {
   if (args.username) newArgs.usernames = [args.username]
   if (args.email) newArgs.emails = [args.email]
   if (!args.id && !args.slug && !args.username && !args.email) return []
+
+  //  Grab any 'photo' filters we want to pass through
+  Object.entries(args).forEach((keyValue) => {
+    const key = keyValue[0]
+    const value = keyValue[1]
+    const keySplit = key.split('_')
+    if (keySplit.length === 2 && keySplit[0] === 'photos') newArgs[key] = value
+  })
 
   const person = await getPeople(newArgs, context, levelDown, initialCall)
   if (person && person.length === 1) return person[0]
