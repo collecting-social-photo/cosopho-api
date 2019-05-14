@@ -180,6 +180,7 @@ type Mutation {
     aperture: Float
     shutterSpeed: Float
     license: String
+    data: String
   ): Photo
   updatePhoto(
     id: String!
@@ -197,6 +198,7 @@ type Mutation {
     license: String
     reviewed: Boolean
     approved: Boolean
+    data: String
   ): Photo
 }
 `
