@@ -1,6 +1,7 @@
 'use strict'
 
 exports.type = {
+
   initiative: `type Initiative {
     id: String!
     slug: String
@@ -29,6 +30,15 @@ exports.type = {
     photos: [Photo]
   `,
 
+  photoData: `
+    type photoData {
+      height: Int
+      width: Int
+      public_id: String
+      version: String
+    }
+  `,
+
   photoInner: `
     id: String!
     instance: String!
@@ -46,7 +56,9 @@ exports.type = {
     license: String
     uploaded: String
     person: Person
+    data: photoData
   `
+
 }
 
 exports.query = {

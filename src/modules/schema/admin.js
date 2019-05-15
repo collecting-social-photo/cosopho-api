@@ -15,6 +15,7 @@ type Roles {
 }
 
 ${base.type.initiative}
+${base.type.photoData}
 
 type Instance {
   id: String!

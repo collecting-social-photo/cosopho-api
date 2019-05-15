@@ -5,6 +5,8 @@ const base = require('./base.js')
 exports.schema = `
 
 ${base.type.initiative}
+${base.type.photoData}
+
 type Person {
   ${base.type.personInner}
 }
