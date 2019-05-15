@@ -12,7 +12,7 @@ const creatIndex = async () => {
   const esclient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH
   })
-  const index = `photo_${process.env.KEY}`
+  const index = `photos_${process.env.KEY}`
   const exists = await esclient.indices.exists({
     index
   })
