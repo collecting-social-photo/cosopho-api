@@ -2,6 +2,17 @@
 
 exports.type = {
 
+  sys: `type Sys {
+    pagination: Pagination
+  }`,
+
+  pagination: `type Pagination {
+    page: Int
+    perPage: Int
+    total: Int
+    maxPage: Int
+  }`,
+
   initiative: `type Initiative {
     id: String!
     slug: String
@@ -12,6 +23,7 @@ exports.type = {
     isActive: Boolean
     isFeatured: Boolean
     photos: [Photo]
+    _sys: Sys
   }`,
 
   personInner: `
@@ -28,6 +40,7 @@ exports.type = {
     personalSite: String
     bio: String
     photos: [Photo]
+    _sys: Sys
   `,
 
   photoData: `
@@ -57,6 +70,7 @@ exports.type = {
     uploaded: String
     person: Person
     data: photoData
+    _sys: Sys
   `
 
 }
@@ -65,6 +79,8 @@ exports.query = {
   hello: `hello: String`,
   initiativesInner: `
     ids: [String]
+    page: Int
+    per_page: Int
     isActive: Boolean
     isFeatured: Boolean
     instance: String!
@@ -76,6 +92,8 @@ exports.query = {
   `,
 
   photosInner: `
+    page: Int
+    per_page: Int
     tags: [String]
     location: String
     fromDate: String

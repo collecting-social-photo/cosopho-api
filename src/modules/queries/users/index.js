@@ -1,4 +1,5 @@
 const elasticsearch = require('elasticsearch')
+const common = require('../common.js')
 const delay = require('delay')
 /*
  *
@@ -34,8 +35,8 @@ const getUsers = async (args, context, levelDown = 2, initialCall = false) => {
   })
   const index = `users_${process.env.KEY}`
 
-  const page = 0
-  const perPage = 200
+  let page = common.getPage(args)
+  let perPage = common.getPerPage(args)
 
   //  This is the base query
   const body = {
@@ -70,6 +71,8 @@ const getUsers = async (args, context, levelDown = 2, initialCall = false) => {
     body
   })
 
+  let total = null
+  if (results.hits.total) total = results.hits.total
   if (!results.hits || !results.hits.hits) {
     return null
   }
@@ -127,6 +130,22 @@ const getUsers = async (args, context, levelDown = 2, initialCall = false) => {
       return user
     })
   }
+
+  //  Finally, add the pagination information
+  const sys = {
+    pagination: {
+      page,
+      perPage,
+      total
+    }
+  }
+  if (total !== null) {
+    sys.pagination.maxPage = Math.ceil(total / perPage) - 1
+  }
+  if (users.length > 0) {
+    users[0]._sys = sys
+  }
+
   return users
 }
 exports.getUsers = getUsers
