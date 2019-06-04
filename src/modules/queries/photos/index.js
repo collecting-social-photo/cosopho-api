@@ -274,7 +274,7 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
     title: args.title,
     personSlug: args.personSlug,
     reviewed: false,
-    approved: false,
+    approved: true,
     uploaded: new Date()
   }
   //  Extra things
