@@ -274,7 +274,7 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
     title: args.title,
     personSlug: args.personSlug,
     reviewed: false,
-    approved: true,
+    approved: false,
     uploaded: new Date()
   }
   //  Extra things
@@ -289,6 +289,7 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
   if (args.aperture) newPhoto.aperture = args.aperture
   if (args.shutterSpeed) newPhoto.shutterSpeed = args.shutterSpeed
   if (args.data) newPhoto.data = JSON.parse(args.data)
+  if (args.approved) newPhoto.approved = args.approved
 
   //  Do some EXIF stuff here if we can
   const esclient = new elasticsearch.Client({

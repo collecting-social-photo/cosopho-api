@@ -181,6 +181,7 @@ type Mutation {
     aperture: Float
     shutterSpeed: Float
     license: String
+    approved: Boolean
     data: String
   ): Photo
   updatePhoto(
