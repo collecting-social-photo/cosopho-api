@@ -16,6 +16,8 @@ type Roles {
 
 ${base.type.initiative}
 ${base.type.photoData}
+${base.type.sys}
+${base.type.pagination}
 
 type Instance {
   id: String!
@@ -52,6 +54,8 @@ type Query {
   ${base.query.hello}
   instances(
     ids: [String]
+    page: Int
+    per_page: Int
   ): [Instance]
   instance(
     id: String
@@ -59,15 +63,21 @@ type Query {
 
   initiatives(
     ${base.query.initiativesInner}
+    photos_page: Int
+    photos_per_page: Int
     photos_approved: Boolean
   ): [Initiative]
   initiative(
     ${base.query.initiativeInner}
+    photos_page: Int
+    photos_per_page: Int
     photos_approved: Boolean
   ): Initiative
 
   users(
     ids: [String]
+    page: Int
+    per_page: Int
   ): [User]
   user(
     id: String!
@@ -75,11 +85,15 @@ type Query {
 
   people(
     ids: [String]
+    page: Int
+    per_page: Int
     slugs: [String]
     usernames: [String]
     emails: [String]
     instance: String!
     photos_approved: Boolean
+    photos_page: Int
+    photos_per_page: Int
   ): [Person]
   person(
     id: String
@@ -88,6 +102,8 @@ type Query {
     email: String
     instance: String
     photos_approved: Boolean
+    photos_page: Int
+    photos_per_page: Int
   ): Person
   loginPerson(
     username: String!

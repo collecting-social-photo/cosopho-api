@@ -1,4 +1,5 @@
 const elasticsearch = require('elasticsearch')
+const common = require('../common.js')
 const utils = require('../../../modules/utils')
 const crypto = require('crypto')
 const delay = require('delay')
@@ -37,8 +38,8 @@ const getInstances = async (args, context, levelDown = 2, initialCall = false) =
   })
   const index = `instances_${process.env.KEY}`
 
-  const page = 0
-  const perPage = 200
+  let page = common.getPage(args)
+  let perPage = common.getPerPage(args)
 
   //  This is the base query
   const body = {
@@ -73,6 +74,8 @@ const getInstances = async (args, context, levelDown = 2, initialCall = false) =
     body
   })
 
+  let total = null
+  if (results.hits.total) total = results.hits.total
   if (!results.hits || !results.hits.hits) {
     return []
   }
@@ -87,6 +90,21 @@ const getInstances = async (args, context, levelDown = 2, initialCall = false) =
       })
       instance.initiatives = initiatives
     }
+  }
+
+  //  Finally, add the pagination information
+  const sys = {
+    pagination: {
+      page,
+      perPage,
+      total
+    }
+  }
+  if (total !== null) {
+    sys.pagination.maxPage = Math.ceil(total / perPage) - 1
+  }
+  if (instances.length > 0) {
+    instances[0]._sys = sys
   }
 
   return instances

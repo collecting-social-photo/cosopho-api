@@ -6,6 +6,8 @@ exports.schema = `
 
 ${base.type.initiative}
 ${base.type.photoData}
+${base.type.sys}
+${base.type.pagination}
 
 type Person {
   ${base.type.personInner}
@@ -30,6 +32,7 @@ type Query {
     slugs: [String]
     usernames: [String]
     instance: String!
+    _sys: Sys
   ): [Person]
   person(
     id: String

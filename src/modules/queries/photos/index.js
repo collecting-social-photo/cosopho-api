@@ -1,4 +1,6 @@
 const elasticsearch = require('elasticsearch')
+const common = require('../common.js')
+
 // const utils = require('../../../modules/utils')
 const crypto = require('crypto')
 const delay = require('delay')
@@ -37,8 +39,8 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   })
   const index = `photos_${process.env.KEY}`
 
-  const page = 0
-  const perPage = 200
+  let page = common.getPage(args)
+  let perPage = common.getPerPage(args)
 
   //  This is the base query
   const body = {
@@ -180,7 +182,8 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     index,
     body
   })
-
+  let total = null
+  if (results.hits.total) total = results.hits.total
   if (!results.hits || !results.hits.hits) {
     return []
   }
@@ -204,6 +207,22 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
       })
     }
   }
+
+  //  Finally, add the pagination information
+  const sys = {
+    pagination: {
+      page,
+      perPage,
+      total
+    }
+  }
+  if (total !== null) {
+    sys.pagination.maxPage = Math.ceil(total / perPage) - 1
+  }
+  if (photos.length > 0) {
+    photos[0]._sys = sys
+  }
+
   return photos
 }
 exports.getPhotos = getPhotos
