@@ -52,7 +52,7 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   const validSorts = ['asc', 'desc']
   const keywordFields = ['title']
   const validFields = ['title', 'date', 'uploaded']
-  console.log(args)
+
   if ('sort_field' in args && validFields.includes(args.sort_field.toLowerCase())) {
     let sortField = args.sort_field
     let sortOrder = 'asc'
@@ -66,8 +66,6 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     }
     body.sort = [sortObj]
   }
-
-  console.log(body)
 
   //  These are things we must find
   const must = []
@@ -426,6 +424,54 @@ const updatePhoto = async (args, context, levelDown = 2, initialCall = false) =>
   return newUpdatedPhoto
 }
 exports.updatePhoto = updatePhoto
+
+/*
+ *
+ * This deletes a single photo
+ *
+ */
+const deletePhoto = async (args, context, levelDown = 2, initialCall = false) => {
+  //  Make sure we are an admin user, as only admin users are allowed to create them
+  if (!context.userRoles || !context.userRoles.isAdmin || context.userRoles.isAdmin === false) return []
+
+  //  We must have an id
+  if (!args.id) return null
+  if (!args.instance) return null
+
+  //  Check the instance exists
+  const checkInstance = await instances.checkInstance({
+    id: args.instance
+  }, context)
+  if (!checkInstance) return null
+
+  //  Make sure the index exists
+  creatIndex()
+
+  const esclient = new elasticsearch.Client({
+    host: process.env.ELASTICSEARCH
+  })
+  const index = `photos_${process.env.KEY}`
+  const type = 'photo'
+
+  try {
+    await esclient.delete({
+      index,
+      type,
+      id: args.id
+    })
+    return {
+      status: 'ok',
+      success: true
+    }
+  } catch (er) {
+    const response = JSON.parse(er.response)
+    return {
+      status: response.result,
+      success: false
+    }
+  }
+}
+exports.deletePhoto = deletePhoto
 
 const initiatives = require('../initiatives')
 const instances = require('../instances')

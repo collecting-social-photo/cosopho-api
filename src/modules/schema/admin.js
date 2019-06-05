@@ -218,5 +218,9 @@ type Mutation {
     approved: Boolean
     data: String
   ): Photo
+  deletePhoto(
+    id: String!
+    instance: String!
+  ): Status
 }
 `

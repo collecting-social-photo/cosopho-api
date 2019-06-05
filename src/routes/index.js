@@ -338,6 +338,9 @@ const root = {
   },
   updatePhoto: (args, context) => {
     return queries.photos.updatePhoto(args, context, 1, true)
+  },
+  deletePhoto: (args, context) => {
+    return queries.photos.deletePhoto(args, context, 1, true)
   }
 
 }
