@@ -48,6 +48,27 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     size: perPage
   }
 
+  // Do the sorting
+  const validSorts = ['asc', 'desc']
+  const keywordFields = ['title']
+  const validFields = ['title', 'date', 'uploaded']
+  console.log(args)
+  if ('sort_field' in args && validFields.includes(args.sort_field.toLowerCase())) {
+    let sortField = args.sort_field
+    let sortOrder = 'asc'
+    if ('sort' in args && (validSorts.includes(args.sort.toLowerCase()))) {
+      sortOrder = args.sort.toLowerCase()
+    }
+    if (keywordFields.includes(sortField.toLowerCase())) sortField = `${sortField}.keyword`
+    const sortObj = {}
+    sortObj[sortField] = {
+      order: sortOrder
+    }
+    body.sort = [sortObj]
+  }
+
+  console.log(body)
+
   //  These are things we must find
   const must = []
 

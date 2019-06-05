@@ -106,6 +106,8 @@ exports.query = {
     shutterSpeed: Float
     license: String
     peopleSlugs: [String]
+    sort: String
+    sort_field: String
   `,
   photoInner: `
     id: String!
