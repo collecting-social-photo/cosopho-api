@@ -105,6 +105,10 @@ type Query {
     photos_page: Int
     photos_per_page: Int
   ): Person
+  checkPerson(
+    id: String!
+    instance: String!
+  ): Status
   loginPerson(
     username: String!
     hashedPassword: String!
@@ -165,10 +169,11 @@ type Mutation {
   ): User
 
   createPerson(
+    id: String!
     instance: String!
     username: String!
-    hashedPassword: String!
-    email: String!
+    avatar: String
+    raw: String!
   ): Person
   updatePerson(
     id: String!

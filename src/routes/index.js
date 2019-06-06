@@ -323,6 +323,9 @@ const root = {
   createPerson: (args, context) => {
     return queries.people.createPerson(args, context, 1, true)
   },
+  checkPerson: (args, context) => {
+    return queries.people.checkPersonAPI(args, context, 1, true)
+  },
   loginPerson: (args, context) => {
     return queries.people.loginPerson(args, context, 1, true)
   },

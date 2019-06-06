@@ -170,6 +170,7 @@ exports.getPeople = getPeople
 const getPerson = async (args, context, levelDown = 2, initialCall = false) => {
   const newArgs = {}
   if (args.id) newArgs.ids = [args.id]
+  if (args.instance) newArgs.instance = args.instance
   if (args.slug) newArgs.slugs = [args.slug]
   if (args.username) newArgs.usernames = [args.username]
   if (args.email) newArgs.emails = [args.email]
@@ -184,7 +185,7 @@ const getPerson = async (args, context, levelDown = 2, initialCall = false) => {
   })
 
   const person = await getPeople(newArgs, context, levelDown, initialCall)
-  if (person && person.length === 1) return person[0]
+  if (person && person.length > 0) return person[0]
 
   return null
 }
@@ -203,6 +204,22 @@ const checkPerson = async (args, context) => {
 }
 exports.checkPerson = checkPerson
 
+const checkPersonAPI = async (args, context) => {
+  context.checkOnly = true
+  const person = await getPerson(args, context)
+  if (person) {
+    return {
+      status: 'ok',
+      success: true
+    }
+  }
+  return {
+    status: 'error',
+    success: false
+  }
+}
+exports.checkPersonAPI = checkPersonAPI
+
 /*
  *
  * This writes a single person
@@ -213,7 +230,7 @@ const createPerson = async (args, context, levelDown = 2, initialCall = false) =
   if (!context.userRoles || !context.userRoles.isAdmin || context.userRoles.isAdmin === false) return []
 
   //  Make sure we have a username and password
-  if (!args.username || !args.instance || !args.email || !args.hashedPassword) return null
+  if (!args.username || !args.instance || !args.id) return null
 
   //  Check the instance exists
   const checkInstance = await instances.checkInstance({
@@ -221,31 +238,28 @@ const createPerson = async (args, context, levelDown = 2, initialCall = false) =
   }, context)
   if (!checkInstance) return null
 
+  //  Check to see if the id already exists, if so then we reject the creation
+  if (await checkPerson({
+    id: args.id,
+    instance: args.instance
+  }, context) === true) return null
+
   //  Check to see if the username already exists
   const usernameUser = await getPerson({
     username: args.username,
     instance: args.instance
   }, context)
+  //  If we already have the username then we will need to make the stub unique
+  let extraSlug = ''
   if (usernameUser) {
-    return null
+    extraSlug = crypto
+      .createHash('sha512')
+      .update(`${args.hashedPassword}-${process.env.KEY}`)
+      .digest('base64')
+      .slice(0, 6)
   }
 
-  //  Check to see if the username already exists
-  const emailUser = await getPerson({
-    email: args.email,
-    instance: args.instance
-  }, context)
-  if (emailUser) {
-    return null
-  }
-
-  const slug = utils.slugify(args.username).substring(0, 36)
-
-  //  Hash the password
-  const hashedPassword = crypto
-    .createHash('sha512')
-    .update(`${args.hashedPassword}-${process.env.KEY}`)
-    .digest('base64')
+  const slug = `${utils.slugify(args.username).substring(0, 36)}${extraSlug}`
 
   //  Make sure the index exists
   creatIndex()
@@ -257,18 +271,19 @@ const createPerson = async (args, context, levelDown = 2, initialCall = false) =
   const type = 'person'
   const d = new Date()
   const newPerson = {
-    id: slug,
+    id: args.id,
     slug,
-    email: args.email,
     username: args.username,
-    hashedPassword,
     instance: args.instance,
+    avatar: args.avatar,
+    raw: JSON.parse(args.raw),
     created: d
   }
+
   await esclient.update({
     index,
     type,
-    id: slug,
+    id: args.id,
     body: {
       doc: newPerson,
       doc_as_upsert: true
@@ -279,7 +294,7 @@ const createPerson = async (args, context, levelDown = 2, initialCall = false) =
 
   //  Return back the values
   const newUpdatedPerson = await getPerson({
-    id: slug,
+    id: args.id,
     instance: args.instance
   }, context)
   return newUpdatedPerson

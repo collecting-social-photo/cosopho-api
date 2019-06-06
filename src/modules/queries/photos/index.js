@@ -162,7 +162,7 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   if ('peopleSlugs' in args && Array.isArray(args.peopleSlugs)) {
     must.push({
       terms: {
-        'personSlug': args.peopleSlugs
+        'personSlug.keyword': args.peopleSlugs
       }
     })
   }
@@ -201,6 +201,7 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     index,
     body
   })
+
   let total = null
   if (results.hits.total) total = results.hits.total
   if (!results.hits || !results.hits.hits) {
