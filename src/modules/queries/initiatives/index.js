@@ -130,7 +130,7 @@ const getInitiatives = async (args, context, levelDown = 2, initialCall = false)
       const key = keyValue[0]
       const value = keyValue[1]
       const keySplit = key.split('_')
-      if (keySplit.length === 2 && keySplit[0] === 'photos') newArgs[keySplit[1]] = value
+      if (keySplit.length > 1 && keySplit[0] === 'photos') newArgs[key.replace('photos_', '')] = value
     })
 
     const initiativePhotos = await photos.getPhotos(newArgs, context, levelDown)
@@ -185,7 +185,7 @@ const getInitiative = async (args, context, levelDown = 2, initialCall = false) 
     const key = keyValue[0]
     const value = keyValue[1]
     const keySplit = key.split('_')
-    if (keySplit.length === 2 && keySplit[0] === 'photos') newArgs[key] = value
+    if (keySplit.length > 1 && keySplit[0] === 'photos') newArgs[key] = value
   })
 
   const initiative = await getInitiatives(newArgs, context, levelDown, initialCall)

@@ -126,7 +126,7 @@ const getPeople = async (args, context, levelDown = 2, initialCall = false) => {
       const key = keyValue[0]
       const value = keyValue[1]
       const keySplit = key.split('_')
-      if (keySplit.length === 2 && keySplit[0] === 'photos') newArgs[keySplit[1]] = value
+      if (keySplit.length > 1 && keySplit[0] === 'photos') newArgs[key.replace('photos_', '')] = value
     })
 
     const peoplePhotos = await photos.getPhotos(newArgs, context)
@@ -181,9 +181,8 @@ const getPerson = async (args, context, levelDown = 2, initialCall = false) => {
     const key = keyValue[0]
     const value = keyValue[1]
     const keySplit = key.split('_')
-    if (keySplit.length === 2 && keySplit[0] === 'photos') newArgs[key] = value
+    if (keySplit.length > 1 && keySplit[0] === 'photos') newArgs[key] = value
   })
-
   const person = await getPeople(newArgs, context, levelDown, initialCall)
   if (person && person.length > 0) return person[0]
 

@@ -95,6 +95,7 @@ type Query {
     photos_page: Int
     photos_per_page: Int
   ): [Person]
+
   person(
     id: String
     slug: String
