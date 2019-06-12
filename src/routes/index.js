@@ -392,7 +392,7 @@ const getUser = async (token) => {
   const exists = await esclient.indices.exists({
     index
   })
-  if (exists === false) return {}
+  if (exists === false) return null
   let records = null
   try {
     records = await esclient.search({
@@ -420,7 +420,7 @@ const getUser = async (token) => {
   }
 
   //  If we got here then we didn't find anyone return null
-  return {}
+  return null
 }
 
 //  If we are doing a direct query we need to grab the token from
@@ -462,6 +462,21 @@ router.use('/:token/playground', bodyParser.json(), expressGraphql(async (req) =
       }
     }
   }
+
+  //  Check to see if the user exists
+  if (user === null) {
+    throw new Error('User not found.')
+  }
+  //  See if the developer token has been revoked
+  //  If there are no roles, or there is a developer role but it's false, then we may
+  //  not have a valid api token
+  if (!user.roles || !('isDeveloper' in user.roles) || user.roles.isDeveloper === false) {
+    //  But them being an admin user overrides that, so we check to see if they aren't
+    if (!('isAdmin' in user.roles) || user.roles.isAdmin === false) {
+      throw new Error('Your API token is not valid')
+    }
+  }
+
   //  call the query method passing in the playground toggle, user roles and
   //  token for tracking
   return (getGrpObj(true, user.roles, req.params.token))
