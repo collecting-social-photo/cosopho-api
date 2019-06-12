@@ -69,6 +69,7 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
 
   //  These are things we must find
   const must = []
+  const mustNot = []
 
   //  If we are looking for a bunch of ids, then we do that here
   if ('ids' in args && Array.isArray(args.ids)) {
@@ -178,7 +179,9 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   //  For approved to be true if we are not any of the "admin/staff" roles.
   if (!context.userRoles.isStaff && !context.userRoles.isVendor && !context.userRoles.isAdmin) {
     args.approved = true
+    args.suspended = false
   }
+
   if ('approved' in args) {
     must.push({
       match: {
@@ -187,14 +190,30 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     })
   }
 
+  if ('suspended' in args) {
+    if (args.suspended === true) {
+      must.push({
+        match: {
+          'suspended': true
+        }
+      })
+    } else {
+      mustNot.push({
+        match: {
+          'suspended': true
+        }
+      })
+    }
+  }
+
   //  If we have something with *must* do, then we add that
   //  to the search
-  if (must.length > 0) {
+  if (must.length > 0 || mustNot.length > 0) {
     body.query = {
-      bool: {
-        must
-      }
+      bool: {}
     }
+    if (must.length) body.query.bool.must = must
+    if (mustNot.length) body.query.bool.must_not = mustNot
   }
 
   let results = await esclient.search({

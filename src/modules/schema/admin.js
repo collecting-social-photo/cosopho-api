@@ -48,6 +48,7 @@ type Photo {
   ${base.type.photoInner}
   approved: Boolean
   reviewed: Boolean
+  suspended: Boolean
 }
 
 type Query {
@@ -122,6 +123,7 @@ type Query {
     instance: String
     reviewed: Boolean
     approved: Boolean
+    suspended: Boolean
   ): [Photo]
   photo(
     id: String!
