@@ -48,9 +48,6 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     size: perPage
   }
 
-  console.log('body')
-  console.log(body)
-
   // Do the sorting
   const validSorts = ['asc', 'desc']
   const keywordFields = ['title']
@@ -206,6 +203,7 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   })
 
   let total = null
+  console.log(results)
   if (results.hits.total) total = results.hits.total
   if (!results.hits || !results.hits.hits) {
     return []
