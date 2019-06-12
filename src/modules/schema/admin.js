@@ -42,6 +42,7 @@ type Person {
   email: String
   dateOfBirth: String
   placeOfBirth: String
+  suspended: Boolean
 }
 
 type Photo {
@@ -181,9 +182,8 @@ type Mutation {
   updatePerson(
     id: String!
     instance: String!
-    username: String
-    hashedPassword: String
-    email: String
+    displayName: String
+    suspended: Boolean
   ): Person
   deletePerson(
     id: String!
