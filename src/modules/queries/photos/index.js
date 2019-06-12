@@ -203,8 +203,8 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   })
 
   let total = null
-  console.log(results)
   if (results.hits.total) total = results.hits.total
+  if (results.hits.total.value) total = results.hits.total.value
   if (!results.hits || !results.hits.hits) {
     return []
   }
