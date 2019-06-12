@@ -329,6 +329,9 @@ const root = {
   loginPerson: (args, context) => {
     return queries.people.loginPerson(args, context, 1, true)
   },
+  updatePerson: (args, context) => {
+    return queries.people.updatePerson(args, context, 1, true)
+  },
 
   photo: (args, context) => {
     return queries.photos.getPhoto(args, context, 1, true)

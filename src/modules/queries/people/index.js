@@ -219,6 +219,102 @@ const checkPersonAPI = async (args, context) => {
 }
 exports.checkPersonAPI = checkPersonAPI
 
+const updatePerson = async (args, context, levelDown = 2, initialCall = false) => {
+  //  Make sure we are an admin user, as only admin users are allowed to create them
+  if (!context.userRoles || !context.userRoles.isAdmin || context.userRoles.isAdmin === false) return []
+
+  //  We must have an id
+  if (!args.id) return null
+  if (!args.instance) return null
+
+  //  Check the instance exists
+  const checkInstance = await instances.checkInstance({
+    id: args.instance
+  }, context)
+  if (!checkInstance) return null
+
+  //  Make sure the index exists
+  creatIndex()
+
+  const esclient = new elasticsearch.Client({
+    host: process.env.ELASTICSEARCH
+  })
+  const index = `people_${process.env.KEY}`
+  const type = 'person'
+
+  //  Grab the user before we update them
+  const preUpdatedPerson = await getPerson({
+    id: args.id,
+    instance: args.instance
+  }, context)
+
+  const updatedPerson = {
+    id: args.id
+  }
+
+  //  These are the fields that can be updated
+  const keys = ['displayName',
+    'suspended'
+  ]
+
+  //  Check to see if we have a new value, if so add it to the update record obj
+  keys.forEach((key) => {
+    if (key in args) {
+      updatedPerson[key] = args[key]
+    }
+  })
+
+  //  Update the thing
+  await esclient.update({
+    index,
+    type,
+    id: args.id,
+    body: {
+      doc: updatedPerson,
+      doc_as_upsert: true
+    }
+  })
+
+  //  If we are suspending a user then we need to also suspend all the photos
+  //  connected to that user
+  if ('suspended' in args) {
+    const updateBody = {
+      'query': {
+        'bool': {
+          'must': [{
+            'match': {
+              'personSlug': preUpdatedPerson.slug
+            }
+          }, {
+            'match': {
+              'instance': args.instance
+            }
+          }]
+        }
+      },
+      'script': {
+        'inline': `ctx._source.suspended = ${args.suspended}`
+      }
+    }
+
+    await esclient.updateByQuery({
+      index: `photos_${process.env.KEY}`,
+      type: 'photo',
+      body: updateBody
+    })
+  }
+
+  await delay(2000)
+
+  //  Return back the values
+  const newUpdatedPerson = await getPerson({
+    id: args.id,
+    instance: args.instance
+  }, context)
+  return newUpdatedPerson
+}
+exports.updatePerson = updatePerson
+
 /*
  *
  * This writes a single person

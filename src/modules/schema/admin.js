@@ -42,12 +42,14 @@ type Person {
   email: String
   dateOfBirth: String
   placeOfBirth: String
+  suspended: Boolean
 }
 
 type Photo {
   ${base.type.photoInner}
   approved: Boolean
   reviewed: Boolean
+  suspended: Boolean
 }
 
 type Query {
@@ -66,12 +68,14 @@ type Query {
     photos_page: Int
     photos_per_page: Int
     photos_approved: Boolean
+    photos_suspended: Boolean
   ): [Initiative]
   initiative(
     ${base.query.initiativeInner}
     photos_page: Int
     photos_per_page: Int
     photos_approved: Boolean
+    photos_suspended: Boolean
   ): Initiative
 
   users(
@@ -92,6 +96,7 @@ type Query {
     emails: [String]
     instance: String!
     photos_approved: Boolean
+    photos_suspended: Boolean
     photos_page: Int
     photos_per_page: Int
   ): [Person]
@@ -103,6 +108,7 @@ type Query {
     email: String
     instance: String
     photos_approved: Boolean
+    photos_suspended: Boolean
     photos_page: Int
     photos_per_page: Int
   ): Person
@@ -122,6 +128,7 @@ type Query {
     instance: String
     reviewed: Boolean
     approved: Boolean
+    suspended: Boolean
   ): [Photo]
   photo(
     id: String!
@@ -179,9 +186,8 @@ type Mutation {
   updatePerson(
     id: String!
     instance: String!
-    username: String
-    hashedPassword: String
-    email: String
+    displayName: String
+    suspended: Boolean
   ): Person
   deletePerson(
     id: String!
