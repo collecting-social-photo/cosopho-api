@@ -2,11 +2,11 @@
 
 const base = require('./base.js')
 
-exports.schema = `
+const schema = `
 
+${base.type.sys}
 ${base.type.initiative}
 ${base.type.photoData}
-${base.type.sys}
 ${base.type.pagination}
 
 type Person {
@@ -32,7 +32,6 @@ type Query {
     slugs: [String]
     usernames: [String]
     instance: String!
-    _sys: Sys
   ): [Person]
   person(
     id: String
@@ -42,10 +41,10 @@ type Query {
   ): Person
 
   photos(
-    ids: [String]!
+    ids: [String]
     instance: String!
     ${base.query.photosInner}
-  )
+  ): [Photo]
   photo(
     id: String!
     instance: String!
@@ -53,3 +52,4 @@ type Query {
 
 }
 `
+exports.schema = schema
