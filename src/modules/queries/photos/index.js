@@ -48,6 +48,9 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     size: perPage
   }
 
+  console.log('body')
+  console.log(body)
+
   // Do the sorting
   const validSorts = ['asc', 'desc']
   const keywordFields = ['title']
