@@ -68,12 +68,14 @@ type Query {
     photos_page: Int
     photos_per_page: Int
     photos_approved: Boolean
+    photos_suspended: Boolean
   ): [Initiative]
   initiative(
     ${base.query.initiativeInner}
     photos_page: Int
     photos_per_page: Int
     photos_approved: Boolean
+    photos_suspended: Boolean
   ): Initiative
 
   users(
@@ -94,6 +96,7 @@ type Query {
     emails: [String]
     instance: String!
     photos_approved: Boolean
+    photos_suspended: Boolean
     photos_page: Int
     photos_per_page: Int
   ): [Person]
@@ -105,6 +108,7 @@ type Query {
     email: String
     instance: String
     photos_approved: Boolean
+    photos_suspended: Boolean
     photos_page: Int
     photos_per_page: Int
   ): Person
