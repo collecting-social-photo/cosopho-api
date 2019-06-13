@@ -67,6 +67,15 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     body.sort = [sortObj]
   }
 
+  //  If we don't have a sort then default to uploaded desc
+  if (!body.sort) {
+    body.sort = {
+      'uploaded': {
+        order: 'desc'
+      }
+    }
+  }
+
   //  These are things we must find
   const must = []
   const mustNot = []
