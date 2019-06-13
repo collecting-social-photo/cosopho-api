@@ -450,6 +450,7 @@ const updatePhoto = async (args, context, levelDown = 2, initialCall = false) =>
   keys.forEach((key) => {
     if (key in args) {
       updatedPhoto[key] = args[key]
+      if (key === 'date') updatedPhoto[key] = new Date(args[key])
     }
   })
 
