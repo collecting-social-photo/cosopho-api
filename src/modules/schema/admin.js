@@ -208,6 +208,8 @@ type Mutation {
     model: String
     aperture: Float
     shutterSpeed: Float
+    ISO: Int
+    focalLength: Int
     license: String
     approved: Boolean
     data: String
@@ -225,6 +227,8 @@ type Mutation {
     model: String
     aperture: Float
     shutterSpeed: Float
+    ISO: Int
+    focalLength: Int
     license: String
     reviewed: Boolean
     approved: Boolean

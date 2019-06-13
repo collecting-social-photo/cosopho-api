@@ -66,6 +66,8 @@ exports.type = {
     model: String
     aperture: Float
     shutterSpeed: Float
+    ISO: Int
+    focalLength: Int
     license: String
     uploaded: String
     person: Person
@@ -104,6 +106,8 @@ exports.query = {
     model: String
     aperture: Float
     shutterSpeed: Float
+    ISO: Int
+    focalLength: Int
     license: String
     peopleSlugs: [String]
     sort: String

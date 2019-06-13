@@ -132,7 +132,7 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   if ('make' in args && args.make !== '') {
     must.push({
       match: {
-        'make': args.make
+        'make.keyword': args.make
       }
     })
   }
@@ -140,7 +140,7 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   if ('model' in args && args.model !== '') {
     must.push({
       match: {
-        'model': args.model
+        'model.keyword': args.model
       }
     })
   }
@@ -157,6 +157,22 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     must.push({
       match: {
         'shutterSpeed': args.shutterSpeed
+      }
+    })
+  }
+
+  if ('ISO' in args) {
+    must.push({
+      match: {
+        'ISO': args.ISO
+      }
+    })
+  }
+
+  if ('focalLength' in args) {
+    must.push({
+      match: {
+        'focalLength': args.focalLength
       }
     })
   }
@@ -356,6 +372,8 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
   if (args.model) newPhoto.model = args.model
   if (args.aperture) newPhoto.aperture = args.aperture
   if (args.shutterSpeed) newPhoto.shutterSpeed = args.shutterSpeed
+  if (args.ISO) newPhoto.ISO = args.ISO
+  if (args.focalLength) newPhoto.focalLength = args.focalLength
   if (args.data) newPhoto.data = JSON.parse(args.data)
   if (args.approved) newPhoto.approved = args.approved
 
@@ -421,6 +439,8 @@ const updatePhoto = async (args, context, levelDown = 2, initialCall = false) =>
     'model',
     'aperture',
     'shutterSpeed',
+    'ISO',
+    'focalLength',
     'license',
     'reviewed',
     'approved'
