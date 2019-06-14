@@ -22,6 +22,9 @@ ${base.type.pagination}
 type Instance {
   id: String!
   title: String
+  colour: String
+  logo: String
+  userFields: String
   initiatives: [Initiative]
 }
 
@@ -140,10 +143,16 @@ type Query {
 type Mutation {
   createInstance(
     title: String!
+    colour: String
+    logo: String
+    userFields: String
   ): Instance
   updateInstance(
     id: String!
     title: String!
+    colour: String
+    logo: String
+    userFields: String
   ): Instance
   deleteInstance(
     id: String!
