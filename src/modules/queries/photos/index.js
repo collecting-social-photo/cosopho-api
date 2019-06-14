@@ -376,6 +376,7 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
   if (args.focalLength) newPhoto.focalLength = args.focalLength
   if (args.data) newPhoto.data = JSON.parse(args.data)
   if (args.approved) newPhoto.approved = args.approved
+  if (args.notes) newPhoto.notes = args.notes
 
   //  Do some EXIF stuff here if we can
   const esclient = new elasticsearch.Client({
@@ -443,7 +444,8 @@ const updatePhoto = async (args, context, levelDown = 2, initialCall = false) =>
     'focalLength',
     'license',
     'reviewed',
-    'approved'
+    'approved',
+    'notes'
   ]
 
   //  Check to see if we have a new value, if so add it to the update record obj

@@ -50,6 +50,7 @@ type Person {
 
 type Photo {
   ${base.type.photoInner}
+  notes: String
   approved: Boolean
   reviewed: Boolean
   suspended: Boolean
@@ -222,6 +223,7 @@ type Mutation {
     license: String
     approved: Boolean
     data: String
+    notes: String
   ): Photo
   updatePhoto(
     id: String!
@@ -242,6 +244,7 @@ type Mutation {
     reviewed: Boolean
     approved: Boolean
     data: String
+    notes: String
   ): Photo
   deletePhoto(
     id: String!
