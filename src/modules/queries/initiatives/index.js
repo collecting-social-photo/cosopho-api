@@ -247,6 +247,7 @@ const createInitiative = async (args, context, levelDown = 2, initialCall = fals
     isActive: args.isActive,
     isFeatured: args.isFeatured
   }
+
   await esclient.update({
     index,
     type,

@@ -3,6 +3,7 @@ const common = require('../common.js')
 const utils = require('../../../modules/utils')
 const crypto = require('crypto')
 const delay = require('delay')
+const request = require('request')
 
 /*
  *
@@ -80,7 +81,7 @@ const getInstances = async (args, context, levelDown = 2, initialCall = false) =
     return []
   }
 
-  const instances = results.hits.hits.map((instance) => instance._source)
+  let instances = results.hits.hits.map((instance) => instance._source)
 
   //  If we are not only checking then go get more information
   if (!context.checkOnly) {
@@ -106,6 +107,14 @@ const getInstances = async (args, context, levelDown = 2, initialCall = false) =
   if (instances.length > 0) {
     instances[0]._sys = sys
   }
+
+  instances = instances.map((instance) => {
+    //  Set up default colour, logo and user fields if we don't have them
+    if (!instance.colour) instance.colour = '000000'
+    if (!instance.logo) instance.logo = 'iVBORw0KGgoAAAANSUhEUgAAAYAAAACACAYAAAACsL4LAAAA2klEQVR4nO3BAQ0AAAjAoOewf1BruAlUTQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALwHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcEG1EdcAGyFq6tsAAAAASUVORK5CYII='
+    if (!instance.userFields) instance.userFields = '{}'
+    return instance
+  })
 
   return instances
 }
@@ -174,6 +183,11 @@ const createInstance = async (args, context, levelDown = 2, initialCall = false)
     created: d,
     title: args.title
   }
+  //  Now the optional ones
+  if (args.colour) newInstance.colour = args.colour
+  if (args.logo) newInstance.logo = args.logo
+  if (args.userFields) newInstance.userFields = JSON.parse(args.userFields)
+
   await esclient.update({
     index,
     type,
@@ -218,6 +232,10 @@ const updateInstance = async (args, context, levelDown = 2, initialCall = false)
     id: args.id,
     title: args.title
   }
+  if (args.colour) updatedInstance.colour = args.colour
+  if (args.logo) updatedInstance.logo = args.logo
+  if (args.userFields) updatedInstance.userFields = JSON.parse(args.userFields)
+
   await esclient.update({
     index,
     type,
@@ -234,6 +252,14 @@ const updateInstance = async (args, context, levelDown = 2, initialCall = false)
   const newUpdatedInstance = await getInstance({
     id: args.id
   }, context)
+
+  //  Check to see if we have an endpoint for this instance
+  //  If so then we call it
+  if (global && global.config && global.config.auth0 && global.config.auth0[`AUTH0_CALLBACK_URL_${args.id}_FRONTEND`]) {
+    const url = global.config.auth0[`AUTH0_CALLBACK_URL_${args.id}_FRONTEND`].replace('callback', `update/${global.config.handshake}`)
+    request(url)
+  }
+
   return newUpdatedInstance
 }
 exports.updateInstance = updateInstance
