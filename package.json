@@ -43,7 +43,7 @@
     "pretty-data": "^0.40.0",
     "prismjs": "^1.13.0",
     "prompt-sync": "^4.1.6",
-    "request": "^2.83.0",
+    "request": "^2.88.0",
     "request-promise": "^4.2.2",
     "request-promise-native": "^1.0.5",
     "run-sequence": "^2.2.0",

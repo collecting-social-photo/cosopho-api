@@ -3,6 +3,7 @@ const common = require('../common.js')
 const utils = require('../../../modules/utils')
 const crypto = require('crypto')
 const delay = require('delay')
+const request = require('request')
 
 /*
  *
@@ -109,7 +110,7 @@ const getInstances = async (args, context, levelDown = 2, initialCall = false) =
 
   instances = instances.map((instance) => {
     //  Set up default colour, logo and user fields if we don't have them
-    if (!instance.colour) instance.colour = '#000000'
+    if (!instance.colour) instance.colour = '000000'
     if (!instance.logo) instance.logo = 'iVBORw0KGgoAAAANSUhEUgAAAYAAAACACAYAAAACsL4LAAAA2klEQVR4nO3BAQ0AAAjAoOewf1BruAlUTQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALwHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcEG1EdcAGyFq6tsAAAAASUVORK5CYII='
     if (!instance.userFields) instance.userFields = '{}'
     return instance
@@ -251,6 +252,14 @@ const updateInstance = async (args, context, levelDown = 2, initialCall = false)
   const newUpdatedInstance = await getInstance({
     id: args.id
   }, context)
+
+  //  Check to see if we have an endpoint for this instance
+  //  If so then we call it
+  if (global && global.config && global.config.auth0 && global.config.auth0[`AUTH0_CALLBACK_URL_${args.id}_FRONTEND`]) {
+    const url = global.config.auth0[`AUTH0_CALLBACK_URL_${args.id}_FRONTEND`].replace('callback', `update/${global.config.handshake}`)
+    request(url)
+  }
+
   return newUpdatedInstance
 }
 exports.updateInstance = updateInstance
