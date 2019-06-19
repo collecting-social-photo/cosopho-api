@@ -54,6 +54,7 @@ type Photo {
   approved: Boolean
   reviewed: Boolean
   suspended: Boolean
+  archived: Boolean
 }
 
 type Query {
@@ -73,6 +74,7 @@ type Query {
     photos_per_page: Int
     photos_approved: Boolean
     photos_suspended: Boolean
+    photos_archived: Boolean
   ): [Initiative]
   initiative(
     ${base.query.initiativeInner}
@@ -80,6 +82,7 @@ type Query {
     photos_per_page: Int
     photos_approved: Boolean
     photos_suspended: Boolean
+    photos_archived: Boolean
   ): Initiative
 
   users(
@@ -101,6 +104,7 @@ type Query {
     instance: String!
     photos_approved: Boolean
     photos_suspended: Boolean
+    photos_archived: Boolean
     photos_page: Int
     photos_per_page: Int
   ): [Person]
@@ -113,6 +117,7 @@ type Query {
     instance: String
     photos_approved: Boolean
     photos_suspended: Boolean
+    photos_archived: Boolean
     photos_page: Int
     photos_per_page: Int
   ): Person
@@ -133,6 +138,7 @@ type Query {
     reviewed: Boolean
     approved: Boolean
     suspended: Boolean
+    archived: Boolean
   ): [Photo]
   photo(
     id: String!
@@ -198,6 +204,7 @@ type Mutation {
     instance: String!
     displayName: String
     suspended: Boolean
+    archived: Boolean
   ): Person
   deletePerson(
     id: String!
@@ -222,6 +229,7 @@ type Mutation {
     focalLength: Int
     license: String
     approved: Boolean
+    archived: Boolean
     data: String
     notes: String
   ): Photo
