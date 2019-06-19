@@ -229,6 +229,7 @@ type Mutation {
     focalLength: Int
     license: String
     approved: Boolean
+    archived: Boolean
     data: String
     notes: String
   ): Photo

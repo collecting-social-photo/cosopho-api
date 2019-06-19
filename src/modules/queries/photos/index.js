@@ -376,6 +376,7 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
     personSlug: args.personSlug,
     reviewed: false,
     approved: false,
+    archived: false,
     uploaded: new Date()
   }
   //  Extra things
@@ -385,6 +386,7 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
   if (args.date) newPhoto.date = new Date(args.date)
   if (args.socialMedias) newPhoto.socialMedias = args.socialMedias
   if (args.license) newPhoto.license = args.license
+  if (args.archived) newPhoto.archived = args.archived
   if (args.make) newPhoto.make = args.make
   if (args.model) newPhoto.model = args.model
   if (args.aperture) newPhoto.aperture = args.aperture
