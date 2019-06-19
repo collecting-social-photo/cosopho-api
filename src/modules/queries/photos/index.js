@@ -205,6 +205,7 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   if (!context.userRoles.isStaff && !context.userRoles.isVendor && !context.userRoles.isAdmin) {
     args.approved = true
     args.suspended = false
+    args.archived = false
   }
 
   if ('approved' in args) {
@@ -226,6 +227,22 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
       mustNot.push({
         match: {
           'suspended': true
+        }
+      })
+    }
+  }
+
+  if ('archived' in args) {
+    if (args.archived === true) {
+      must.push({
+        match: {
+          'archived': true
+        }
+      })
+    } else {
+      mustNot.push({
+        match: {
+          'archived': true
         }
       })
     }
