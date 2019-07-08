@@ -253,7 +253,18 @@ const updatePerson = async (args, context, levelDown = 2, initialCall = false) =
   }
 
   //  These are the fields that can be updated
-  const keys = ['displayName',
+  const keys = [
+    'email',
+    'dateOfBirth',
+    'placeOfBirth',
+    'avatar',
+    'name',
+    'gender',
+    'facebook',
+    'instagram',
+    'twitter',
+    'personalSite',
+    'bio',
     'suspended'
   ]
 

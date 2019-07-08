@@ -202,9 +202,19 @@ type Mutation {
   updatePerson(
     id: String!
     instance: String!
-    displayName: String
+    username: String
+    email: String
+    dateOfBirth: String
+    placeOfBirth: String
+    avatar: String
+    name: String
+    gender: String
+    facebook: String
+    instagram: String
+    twitter: String
+    personalSite: String
+    bio: String
     suspended: Boolean
-    archived: Boolean
   ): Person
   deletePerson(
     id: String!
