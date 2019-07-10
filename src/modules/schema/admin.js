@@ -261,6 +261,7 @@ type Mutation {
     license: String
     reviewed: Boolean
     approved: Boolean
+    archived: Boolean
     data: String
     notes: String
   ): Photo

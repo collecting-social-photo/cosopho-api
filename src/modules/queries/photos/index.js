@@ -464,7 +464,8 @@ const updatePhoto = async (args, context, levelDown = 2, initialCall = false) =>
     'license',
     'reviewed',
     'approved',
-    'notes'
+    'notes',
+    'archived'
   ]
 
   //  Check to see if we have a new value, if so add it to the update record obj
