@@ -248,6 +248,14 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     }
   }
 
+  if ('homepage' in args) {
+    must.push({
+      match: {
+        'homepage': args.homepage
+      }
+    })
+  }
+
   //  If we have something with *must* do, then we add that
   //  to the search
   if (must.length > 0 || mustNot.length > 0) {
@@ -376,6 +384,7 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
     personSlug: args.personSlug,
     reviewed: false,
     approved: false,
+    homepage: false,
     archived: false,
     uploaded: new Date()
   }
@@ -395,6 +404,7 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
   if (args.focalLength) newPhoto.focalLength = args.focalLength
   if (args.data) newPhoto.data = JSON.parse(args.data)
   if (args.approved) newPhoto.approved = args.approved
+  if (args.homepage) newPhoto.homepage = args.homepage
   if (args.notes) newPhoto.notes = args.notes
 
   //  Do some EXIF stuff here if we can
@@ -464,6 +474,7 @@ const updatePhoto = async (args, context, levelDown = 2, initialCall = false) =>
     'license',
     'reviewed',
     'approved',
+    'homepage',
     'notes',
     'archived'
   ]
