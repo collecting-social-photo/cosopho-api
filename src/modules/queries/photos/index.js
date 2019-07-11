@@ -249,11 +249,19 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   }
 
   if ('homepage' in args) {
-    must.push({
-      match: {
-        'homepage': args.homepage
-      }
-    })
+    if (args.homepage === true) {
+      must.push({
+        match: {
+          'homepage': true
+        }
+      })
+    } else {
+      mustNot.push({
+        match: {
+          'homepage': true
+        }
+      })
+    }
   }
 
   //  If we have something with *must* do, then we add that
