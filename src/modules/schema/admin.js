@@ -52,6 +52,7 @@ type Photo {
   ${base.type.photoInner}
   notes: String
   approved: Boolean
+  homepage: Boolean
   reviewed: Boolean
   suspended: Boolean
   archived: Boolean
@@ -73,6 +74,7 @@ type Query {
     photos_page: Int
     photos_per_page: Int
     photos_approved: Boolean
+    photos_homepage: Boolean
     photos_suspended: Boolean
     photos_archived: Boolean
   ): [Initiative]
@@ -81,6 +83,7 @@ type Query {
     photos_page: Int
     photos_per_page: Int
     photos_approved: Boolean
+    photos_homepage: Boolean
     photos_suspended: Boolean
     photos_archived: Boolean
   ): Initiative
@@ -103,6 +106,7 @@ type Query {
     emails: [String]
     instance: String!
     photos_approved: Boolean
+    photos_homepage: Boolean
     photos_suspended: Boolean
     photos_archived: Boolean
     photos_page: Int
@@ -116,6 +120,7 @@ type Query {
     email: String
     instance: String
     photos_approved: Boolean
+    photos_homepage: Boolean
     photos_suspended: Boolean
     photos_archived: Boolean
     photos_page: Int
@@ -137,6 +142,7 @@ type Query {
     instance: String
     reviewed: Boolean
     approved: Boolean
+    homepage: Boolean
     suspended: Boolean
     archived: Boolean
   ): [Photo]
@@ -239,6 +245,7 @@ type Mutation {
     focalLength: Int
     license: String
     approved: Boolean
+    homepage: Boolean
     archived: Boolean
     data: String
     notes: String
@@ -261,6 +268,7 @@ type Mutation {
     license: String
     reviewed: Boolean
     approved: Boolean
+    homepage: Boolean
     archived: Boolean
     data: String
     notes: String
