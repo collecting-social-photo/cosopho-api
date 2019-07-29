@@ -58,6 +58,20 @@ type Photo {
   archived: Boolean
 }
 
+type I18n {
+  id: String
+  instance: String
+  section: String
+  token: String
+  language: String
+  string: String
+  createdBy: String
+  created: String
+  updatedBy: String
+  updated: String
+  _sys: Sys
+}
+
 type Query {
   ${base.query.hello}
   instances(
@@ -150,6 +164,23 @@ type Query {
     id: String!
     instance: String
   ): Photo
+
+  strings(
+    ${base.query.photosInner}
+    ids: [String]
+    page: Int
+    per_page: Int
+    instance: String
+    section: String
+    language: String
+    token: String
+    createdBy: String
+    updateBy: String
+  ): [I18n]
+  string(
+    id: String!
+  ): I18n
+
 }
 
 
@@ -279,5 +310,21 @@ type Mutation {
     id: String!
     instance: String!
   ): Status
+
+  createString(
+    instance: String
+    language: String!
+    section: String!
+    token: String!
+    string: String!
+  ): I18n
+  updateString(
+    id: String!
+    string: String!
+  ): I18n
+  deleteString(
+    id: String!
+    instance: String!
+  ): Status  
 }
 `

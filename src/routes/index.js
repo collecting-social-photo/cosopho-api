@@ -347,16 +347,33 @@ const root = {
   },
   deletePhoto: (args, context) => {
     return queries.photos.deletePhoto(args, context, 1, true)
+  },
+
+  string: (args, context) => {
+    return queries.i18n.getString(args, context, 1, true)
+  },
+  strings: (args, context) => {
+    return queries.i18n.getStrings(args, context, 1, true)
+  },
+  createString: (args, context) => {
+    return queries.i18n.createString(args, context, 1, true)
+  },
+  updateString: (args, context) => {
+    return queries.i18n.updateString(args, context, 1, true)
+  },
+  deleteString: (args, context) => {
+    return queries.i18n.deleteString(args, context, 1, true)
   }
 
 }
 
 //  This figures out a bunch of stuff around which queries we can run
 //  and the user context
-const getGrpObj = (isPlayground, userRoles, token) => {
+const getGrpObj = (isPlayground, userId, userRoles, token) => {
   const grpObj = {
     rootValue: root,
     context: {
+      userId,
       userRoles,
       token
     },
@@ -442,12 +459,13 @@ router.use('/graphql', bodyParser.json(), expressGraphql(async (req) => {
   //  this call\
   if (token === process.env.HANDSHAKE) {
     user = {
+      id: 0,
       roles: {
         isAdmin: true
       }
     }
   }
-  return (getGrpObj(false, user.roles, token))
+  return (getGrpObj(false, user.id, user.roles, token))
 }))
 
 //  If we are coming from the playground, then we pull the token from the URL
@@ -460,6 +478,7 @@ router.use('/:token/playground', bodyParser.json(), expressGraphql(async (req) =
   //  this call
   if (req.params.token === process.env.HANDSHAKE) {
     user = {
+      id: 0,
       roles: {
         isAdmin: true
       }
@@ -482,7 +501,7 @@ router.use('/:token/playground', bodyParser.json(), expressGraphql(async (req) =
 
   //  call the query method passing in the playground toggle, user roles and
   //  token for tracking
-  return (getGrpObj(true, user.roles, req.params.token))
+  return (getGrpObj(true, user.id, user.roles, req.params.token))
 }))
 
 // ############################################################################

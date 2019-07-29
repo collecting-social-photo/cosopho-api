@@ -1,3 +1,4 @@
+exports.i18n = require('./i18n')
 exports.initiatives = require('./initiatives')
 exports.instances = require('./instances')
 exports.people = require('./people')
