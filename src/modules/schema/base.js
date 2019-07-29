@@ -62,6 +62,7 @@ exports.type = {
     location: String
     date: String
     socialMedias: [String]
+    otherSM: String
     make: String
     model: String
     aperture: Float
@@ -101,6 +102,7 @@ exports.query = {
     fromDate: String
     endDate: String
     socialMedias: [String]
+    otherSM: String
     initiatives: [String]
     make: String
     model: String

@@ -113,6 +113,14 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     })
   }
 
+  if ('otherSM' in args && args.otherSM !== '') {
+    must.push({
+      match: {
+        'otherSM.keyword': args.otherSM
+      }
+    })
+  }
+
   if ('initiatives' in args && Array.isArray(args.initiatives)) {
     must.push({
       terms: {
@@ -402,6 +410,7 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
   if (args.story) newPhoto.story = args.story
   if (args.date) newPhoto.date = new Date(args.date)
   if (args.socialMedias) newPhoto.socialMedias = args.socialMedias
+  if (args.otherSM) newPhoto.otherSM = args.otherSM
   if (args.license) newPhoto.license = args.license
   if (args.archived) newPhoto.archived = args.archived
   if (args.make) newPhoto.make = args.make
@@ -473,6 +482,7 @@ const updatePhoto = async (args, context, levelDown = 2, initialCall = false) =>
     'location',
     'date',
     'socialMedias',
+    'otherSM',
     'make',
     'model',
     'aperture',

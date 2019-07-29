@@ -237,6 +237,7 @@ type Mutation {
     location: String
     date: String
     socialMedias: [String]
+    otherSM: String
     make: String
     model: String
     aperture: Float
@@ -259,6 +260,7 @@ type Mutation {
     location: String
     date: String
     socialMedias: [String]
+    otherSM: String
     make: String
     model: String
     aperture: Float
