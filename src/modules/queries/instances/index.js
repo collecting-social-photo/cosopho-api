@@ -186,6 +186,8 @@ const createInstance = async (args, context, levelDown = 2, initialCall = false)
   //  Now the optional ones
   if (args.colour) newInstance.colour = args.colour
   if (args.logo) newInstance.logo = args.logo
+  if (args.languages) newInstance.languages = args.languages
+  if (args.defaultLanguage) newInstance.defaultLanguage = args.defaultLanguage
   if (args.userFields) newInstance.userFields = JSON.parse(args.userFields)
 
   await esclient.update({
@@ -217,7 +219,6 @@ const updateInstance = async (args, context, levelDown = 2, initialCall = false)
   //  Make sure we are an admin user, as only admin users are allowed to create them
   if (!context.userRoles || !context.userRoles.isAdmin || context.userRoles.isAdmin === false) return []
 
-  if (!args.title) return null
   if (!args.id) return null
 
   //  Make sure the index exists
@@ -229,11 +230,13 @@ const updateInstance = async (args, context, levelDown = 2, initialCall = false)
   const index = `instances_${process.env.KEY}`
   const type = 'instance'
   const updatedInstance = {
-    id: args.id,
-    title: args.title
+    id: args.id
   }
+  if (args.title) updatedInstance.title = args.title
   if (args.colour) updatedInstance.colour = args.colour
   if (args.logo) updatedInstance.logo = args.logo
+  if (args.languages) updatedInstance.languages = args.languages
+  if (args.defaultLanguage) updatedInstance.defaultLanguage = args.defaultLanguage
   if (args.userFields) updatedInstance.userFields = JSON.parse(args.userFields)
 
   await esclient.update({
@@ -245,19 +248,23 @@ const updateInstance = async (args, context, levelDown = 2, initialCall = false)
       doc_as_upsert: true
     }
   })
-
   await delay(2000)
 
   //  Return back the values
   const newUpdatedInstance = await getInstance({
     id: args.id
   }, context)
-
   //  Check to see if we have an endpoint for this instance
   //  If so then we call it
   if (global && global.config && global.config.auth0 && global.config.auth0[`AUTH0_CALLBACK_URL_${args.id}_FRONTEND`]) {
     const url = global.config.auth0[`AUTH0_CALLBACK_URL_${args.id}_FRONTEND`].replace('callback', `update/${global.config.handshake}`)
-    request(url)
+    request(url,
+      function (error, response, body) {
+        if (error) {
+          console.warn('error:', 'Frontend endpoint unreachable.')
+          console.warn(url)
+        }
+      })
   }
 
   return newUpdatedInstance

@@ -24,6 +24,8 @@ type Instance {
   title: String
   colour: String
   logo: String
+  languages: [String]
+  defaultLanguage: String
   userFields: String
   initiatives: [Initiative]
 }
@@ -189,13 +191,17 @@ type Mutation {
     title: String!
     colour: String
     logo: String
+    languages: [String]
+    defaultLanguage: String
     userFields: String
   ): Instance
   updateInstance(
     id: String!
-    title: String!
+    title: String
     colour: String
     logo: String
+    languages: [String]
+    defaultLanguage: String
     userFields: String
   ): Instance
   deleteInstance(
