@@ -168,7 +168,6 @@ type Query {
   ): Photo
 
   strings(
-    ${base.query.photosInner}
     ids: [String]
     page: Int
     per_page: Int
