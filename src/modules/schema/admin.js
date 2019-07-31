@@ -64,6 +64,7 @@ type I18n {
   id: String
   instance: String
   section: String
+  stub: String
   token: String
   language: String
   string: String
@@ -173,8 +174,9 @@ type Query {
     per_page: Int
     instance: String
     section: String
-    language: String
+    language: [String]
     token: String
+    stub: String
     createdBy: String
     updateBy: String
   ): [I18n]
@@ -320,7 +322,7 @@ type Mutation {
     instance: String
     language: String!
     section: String!
-    token: String!
+    stub: String!
     string: String!
   ): I18n
   updateString(

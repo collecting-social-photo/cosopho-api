@@ -103,18 +103,26 @@ const getStrings = async (args, context, levelDown = 2, initialCall = false) => 
     })
   }
 
-  if ('language' in args && args.language !== '') {
+  if ('language' in args && Array.isArray(args.language)) {
     must.push({
-      match: {
+      terms: {
         'language.keyword': args.language
       }
     })
   }
 
-  if ('token' in args && args.model !== '') {
+  if ('stub' in args && args.stub !== '') {
     must.push({
       match: {
-        'token.keyword': args.model
+        'stub.keyword': args.stub
+      }
+    })
+  }
+
+  if ('token' in args && args.token !== '') {
+    must.push({
+      match: {
+        'token.keyword': args.token
       }
     })
   }
@@ -203,8 +211,8 @@ const createString = async (args, context, levelDown = 2, initialCall = false) =
   //  Make sure we are an admin user, as only admin users are allowed to create them
   if (!context.userRoles || !context.userRoles.isAdmin || context.userRoles.isAdmin === false) return []
 
-  //  Make sure we have an language, section and token
-  if (!args.language || !args.section || !args.token || !args.string || args.string.trim() === '') return null
+  //  Make sure we have an language, section and stub
+  if (!args.language || !args.section || !args.stub || !args.string || args.string.trim() === '') return null
 
   //  Set the default instance to be the key and if we have been passed
   //  an instance make sure it exists and then we use that instead
@@ -217,7 +225,8 @@ const createString = async (args, context, levelDown = 2, initialCall = false) =
     instance = args.instance
   }
 
-  const newId = `${instance}.${utils.slugify(args.section)}.${utils.slugify(args.token)}`
+  const token = `${instance}.${utils.slugify(args.section)}.${utils.slugify(args.stub)}`
+  const newId = `${instance}.${utils.slugify(args.section)}.${utils.slugify(args.stub)}.${args.language}`
 
   //  Make sure the index exists
   creatIndex()
@@ -227,7 +236,8 @@ const createString = async (args, context, levelDown = 2, initialCall = false) =
     id: newId,
     instance,
     section: args.section,
-    token: args.token,
+    stub: args.stub,
+    token,
     language: args.language,
     created: new Date(),
     string: args.string,
