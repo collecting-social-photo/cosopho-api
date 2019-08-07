@@ -1,6 +1,7 @@
 const elasticsearch = require('elasticsearch')
 const common = require('../common.js')
 const utils = require('../../utils')
+const request = require('request')
 
 const delay = require('delay')
 
@@ -91,6 +92,14 @@ const getStrings = async (args, context, levelDown = 2, initialCall = false) => 
     must.push({
       match: {
         'instance': args.instance
+      }
+    })
+  }
+
+  if ('instances' in args && Array.isArray(args.instances)) {
+    must.push({
+      terms: {
+        'instance.keyword': args.instances
       }
     })
   }
@@ -275,16 +284,6 @@ const updateString = async (args, context, levelDown = 2, initialCall = false) =
   //  We must have an id and a string
   if (!args.id || !args.string || args.string.trim() === '') return null
 
-  //  Check the instance exists
-  let instance = process.env.KEY
-  if (args.instance) {
-    const checkInstance = await instances.checkInstance({
-      id: args.instance
-    }, context)
-    if (!checkInstance) return null
-    instance = args.instance
-  }
-
   //  Make sure the index exists
   creatIndex()
 
@@ -295,7 +294,6 @@ const updateString = async (args, context, levelDown = 2, initialCall = false) =
   const type = 'string'
   const updatedString = {
     id: args.id,
-    instance,
     string: args.string,
     updated: new Date(),
     updatedBy: context.userId
@@ -318,6 +316,20 @@ const updateString = async (args, context, levelDown = 2, initialCall = false) =
   const newUpdatedString = await getString({
     id: args.id
   }, context)
+
+  //  Check to see if we have an endpoint for this instance
+  //  If so then we call it
+  if (global && global.config && global.config.auth0 && global.config.auth0[`AUTH0_CALLBACK_URL_${args.id}_FRONTEND`]) {
+    const url = global.config.auth0[`AUTH0_CALLBACK_URL_${args.id}_FRONTEND`].replace('callback', `update/${global.config.handshake}`)
+    request(url,
+      function (error, response, body) {
+        if (error) {
+          console.warn('error:', 'Frontend endpoint unreachable.')
+          console.warn(url)
+        }
+      })
+  }
+
   return newUpdatedString
 }
 exports.updateString = updateString

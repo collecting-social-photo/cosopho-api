@@ -173,6 +173,7 @@ type Query {
     page: Int
     per_page: Int
     instance: String
+    instances: [String]
     section: String
     language: [String]
     token: String
