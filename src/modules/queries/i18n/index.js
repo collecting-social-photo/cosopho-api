@@ -345,15 +345,12 @@ const updateString = async (args, context, levelDown = 2, initialCall = false) =
       })
       //  Loop through them calling each one
       urls.forEach((url) => {
-        console.log(url)
         callbackUrl = url.replace('callback', `update/${global.config.handshake}`)
-        console.log('callbackUrl: ', callbackUrl)
         request(callbackUrl,
           function (error, response, body) {
             if (error) {
               console.log('There was an error')
               console.warn('error:', 'Frontend endpoint unreachable.')
-              console.warn(callbackUrl)
             }
           })
       })
