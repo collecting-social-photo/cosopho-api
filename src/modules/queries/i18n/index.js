@@ -319,27 +319,45 @@ const updateString = async (args, context, levelDown = 2, initialCall = false) =
 
   //  Check to see if we have an endpoint for this instance
   //  If so then we call it
-  console.log('Am here')
   const idSplit = args.id.split('.')
   const instance = idSplit[0]
-  console.log('instance: ', instance)
-  console.log(global.config.auth0)
+  let callbackUrl = null
   if (global && global.config && global.config.auth0 && global.config.auth0[`AUTH0_CALLBACK_URL_${instance}_FRONTEND`]) {
-    const url = global.config.auth0[`AUTH0_CALLBACK_URL_${instance}_FRONTEND`].replace('callback', `update/${global.config.handshake}`)
-    request(url,
+    callbackUrl = global.config.auth0[`AUTH0_CALLBACK_URL_${instance}_FRONTEND`].replace('callback', `update/${global.config.handshake}`)
+    request(callbackUrl,
       function (error, response, body) {
-        console.log(1)
-        console.log(error)
-        console.log(2)
-        console.log(response)
-        console.log(3)
-        console.log(body)
         if (error) {
           console.log('There was an error')
           console.warn('error:', 'Frontend endpoint unreachable.')
-          console.warn(url)
+          console.warn(callbackUrl)
         }
       })
+  } else {
+    //  If there isn't a specific callback url, then we call back any frontend urls we can find
+    //  (because we've updated the main translations not an instance one, so they *all* need to know)
+    if (global && global.config && global.config.auth0) {
+      const urls = []
+      Object.entries(global.config.auth0).forEach((keyValue) => {
+        const key = keyValue[0]
+        const keySplit = key.split('_')
+        const frontend = keySplit.pop()
+        if (frontend === 'FRONTEND') urls.push(keyValue[1])
+      })
+      //  Loop through them calling each one
+      urls.forEach((url) => {
+        console.log(url)
+        callbackUrl = url.replace('callback', `update/${global.config.handshake}`)
+        console.log('callbackUrl: ', callbackUrl)
+        request(callbackUrl,
+          function (error, response, body) {
+            if (error) {
+              console.log('There was an error')
+              console.warn('error:', 'Frontend endpoint unreachable.')
+              console.warn(callbackUrl)
+            }
+          })
+      })
+    }
   }
 
   return newUpdatedString
