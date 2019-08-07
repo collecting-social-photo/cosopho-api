@@ -319,13 +319,23 @@ const updateString = async (args, context, levelDown = 2, initialCall = false) =
 
   //  Check to see if we have an endpoint for this instance
   //  If so then we call it
+  console.log('Am here')
   const idSplit = args.id.split('.')
   const instance = idSplit[0]
+  console.log('instance: ', instance)
+  console.log(global.config.auth0)
   if (global && global.config && global.config.auth0 && global.config.auth0[`AUTH0_CALLBACK_URL_${instance}_FRONTEND`]) {
     const url = global.config.auth0[`AUTH0_CALLBACK_URL_${instance}_FRONTEND`].replace('callback', `update/${global.config.handshake}`)
     request(url,
       function (error, response, body) {
+        console.log(1)
+        console.log(error)
+        console.log(2)
+        console.log(response)
+        console.log(3)
+        console.log(body)
         if (error) {
+          console.log('There was an error')
           console.warn('error:', 'Frontend endpoint unreachable.')
           console.warn(url)
         }
