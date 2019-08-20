@@ -334,5 +334,6 @@ type Mutation {
     id: String!
     instance: String!
   ): Status  
+  deleteAllStrings: Status  
 }
 `

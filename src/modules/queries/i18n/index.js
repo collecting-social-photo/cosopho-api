@@ -402,4 +402,39 @@ const deleteString = async (args, context, levelDown = 2, initialCall = false) =
 }
 exports.deleteString = deleteString
 
+/*
+ *
+ * This deletes a single string
+ *
+ */
+const deleteAllStrings = async (args, context, levelDown = 2, initialCall = false) => {
+  //  Make sure we are an admin user, as only admin users are allowed to create them
+  if (!context.userRoles || !context.userRoles.isAdmin || context.userRoles.isAdmin === false) return []
+
+  //  Default all strings
+  const body = {
+    'query': {
+      'match_all': {}
+    }
+  }
+
+  //  Do some EXIF stuff here if we can
+  const esclient = new elasticsearch.Client({
+    host: process.env.ELASTICSEARCH
+  })
+  const index = `i18ns_${process.env.KEY}`
+  const type = 'string'
+  await esclient.deleteByQuery({
+    index,
+    type,
+    body
+  })
+
+  return {
+    status: 'ok',
+    success: true
+  }
+}
+exports.deleteAllStrings = deleteAllStrings
+
 const instances = require('../instances')

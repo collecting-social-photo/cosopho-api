@@ -363,8 +363,10 @@ const root = {
   },
   deleteString: (args, context) => {
     return queries.i18n.deleteString(args, context, 1, true)
+  },
+  deleteAllStrings: (args, context) => {
+    return queries.i18n.deleteAllStrings(args, context, 1, true)
   }
-
 }
 
 //  This figures out a bunch of stuff around which queries we can run
