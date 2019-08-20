@@ -69,11 +69,18 @@ const getStrings = async (args, context, levelDown = 2, initialCall = false) => 
 
   //  If we don't have a sort then default to uploaded desc
   if (!body.sort) {
-    body.sort = {
+    const sortArray = []
+    sortArray.push({
       'section.keyword': {
-        order: 'desc'
+        order: 'asc'
       }
-    }
+    })
+    sortArray.push({
+      'stub.keyword': {
+        order: 'asc'
+      }
+    })
+    body.sort = sortArray
   }
 
   //  These are things we must find
