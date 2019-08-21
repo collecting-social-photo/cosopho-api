@@ -256,7 +256,7 @@ const createString = async (args, context, levelDown = 2, initialCall = false) =
     token,
     language: args.language,
     created: new Date(),
-    string: args.string,
+    string: unescape(args.string),
     createdBy: context.userId
   }
 
@@ -301,7 +301,7 @@ const updateString = async (args, context, levelDown = 2, initialCall = false) =
   const type = 'string'
   const updatedString = {
     id: args.id,
-    string: args.string,
+    string: unescape(args.string),
     updated: new Date(),
     updatedBy: context.userId
   }
