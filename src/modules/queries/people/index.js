@@ -259,6 +259,7 @@ const updatePerson = async (args, context, levelDown = 2, initialCall = false) =
     'placeOfBirth',
     'avatar',
     'name',
+    'username',
     'gender',
     'facebook',
     'instagram',
