@@ -48,6 +48,7 @@ type Person {
   dateOfBirth: String
   placeOfBirth: String
   suspended: Boolean
+  deleted: Boolean
 }
 
 type Photo {
@@ -57,6 +58,7 @@ type Photo {
   homepage: Boolean
   reviewed: Boolean
   suspended: Boolean
+  ownerDeleted: Boolean
   archived: Boolean
 }
 
@@ -93,6 +95,7 @@ type Query {
     photos_approved: Boolean
     photos_homepage: Boolean
     photos_suspended: Boolean
+    photos_ownerDeleted: Boolean
     photos_archived: Boolean
   ): [Initiative]
   initiative(
@@ -102,6 +105,7 @@ type Query {
     photos_approved: Boolean
     photos_homepage: Boolean
     photos_suspended: Boolean
+    photos_ownerDeleted: Boolean
     photos_archived: Boolean
   ): Initiative
 
@@ -125,6 +129,7 @@ type Query {
     photos_approved: Boolean
     photos_homepage: Boolean
     photos_suspended: Boolean
+    photos_ownerDeleted: Boolean
     photos_archived: Boolean
     photos_page: Int
     photos_per_page: Int
@@ -139,6 +144,7 @@ type Query {
     photos_approved: Boolean
     photos_homepage: Boolean
     photos_suspended: Boolean
+    photos_ownerDeleted: Boolean
     photos_archived: Boolean
     photos_page: Int
     photos_per_page: Int
@@ -161,6 +167,7 @@ type Query {
     approved: Boolean
     homepage: Boolean
     suspended: Boolean
+    ownerDeleted: Boolean
     archived: Boolean
   ): [Photo]
   photo(
@@ -260,6 +267,7 @@ type Mutation {
     personalSite: String
     bio: String
     suspended: Boolean
+    deleted: Boolean
   ): Person
   deletePerson(
     id: String!
