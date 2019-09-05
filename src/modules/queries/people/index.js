@@ -266,7 +266,8 @@ const updatePerson = async (args, context, levelDown = 2, initialCall = false) =
     'twitter',
     'personalSite',
     'bio',
-    'suspended'
+    'suspended',
+    'deleted'
   ]
 
   //  Check to see if we have a new value, if so add it to the update record obj
@@ -289,8 +290,9 @@ const updatePerson = async (args, context, levelDown = 2, initialCall = false) =
 
   //  If we are suspending a user then we need to also suspend all the photos
   //  connected to that user
+  let updateBody = null
   if ('suspended' in args) {
-    const updateBody = {
+    updateBody = {
       'query': {
         'bool': {
           'must': [{
@@ -308,7 +310,32 @@ const updatePerson = async (args, context, levelDown = 2, initialCall = false) =
         'inline': `ctx._source.suspended = ${args.suspended}`
       }
     }
+  }
 
+  //  If we are deleting a user then we need to also delete all the photos
+  //  connected to that user
+  if ('deleted' in args) {
+    updateBody = {
+      'query': {
+        'bool': {
+          'must': [{
+            'match': {
+              'personSlug': preUpdatedPerson.slug
+            }
+          }, {
+            'match': {
+              'instance': args.instance
+            }
+          }]
+        }
+      },
+      'script': {
+        'inline': `ctx._source.ownerDeleted = ${args.deleted}`
+      }
+    }
+  }
+
+  if (updateBody !== null) {
     await esclient.updateByQuery({
       index: `photos_${process.env.KEY}`,
       type: 'photo',

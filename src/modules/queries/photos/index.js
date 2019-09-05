@@ -212,7 +212,8 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   //  For approved to be true if we are not any of the "admin/staff" roles.
   if (!context.userRoles.isStaff && !context.userRoles.isVendor && !context.userRoles.isAdmin) {
     args.approved = true
-    args.suspended = false
+    args.ownerDeleted = false
+    args.deleted = false
     args.archived = false
   }
 
@@ -235,6 +236,22 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
       mustNot.push({
         match: {
           'suspended': true
+        }
+      })
+    }
+  }
+
+  if ('ownerDeleted' in args) {
+    if (args.ownerDeleted === true) {
+      must.push({
+        match: {
+          'ownerDeleted': true
+        }
+      })
+    } else {
+      mustNot.push({
+        match: {
+          'ownerDeleted': true
         }
       })
     }
