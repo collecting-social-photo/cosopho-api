@@ -69,6 +69,11 @@ const argOptionDefinitions = [{
   type: String
 },
 {
+  name: 'callback',
+  alias: 'c',
+  type: String
+},
+{
   name: 'skipBuild',
   alias: 's',
   type: Boolean
@@ -100,6 +105,7 @@ const argOptionDefinitions = [{
  * and if we should show the help text or not
  */
 const commandLineArgs = require('command-line-args')
+
 let showHelp = false
 let argOptions = null
 try {
@@ -155,11 +161,6 @@ if ('skipOpen' in argOptions && argOptions.skipOpen === true) {
  * base everything else
  */
 if (!process.env.KEY) {
-  console.log(`\n\nYou must pass the 'key' parameter 'npm start -- --key xxxxx --instance yyyyyyyy' see the README.md for more details\n\n`.error)
-  showHelp = true
-}
-
-if (!process.env.INSTANCE) {
   console.log(`\n\nYou must pass the 'key' parameter 'npm start -- --key xxxxx --instance yyyyyyyy' see the README.md for more details\n\n`.error)
   showHelp = true
 }
@@ -404,6 +405,7 @@ p.then(res => {
 
   app.engine('html', hbs.engine)
   app.set('view engine', 'html')
+  app.locals.layout = false
   app.set('views', `${__dirname}/app/templates`)
   app.use(
     express.static(`${__dirname}/app/public`, {
