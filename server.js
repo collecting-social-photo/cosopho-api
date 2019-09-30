@@ -11,6 +11,7 @@
  */
 const fs = require('fs')
 const path = require('path')
+require('dotenv').config()
 
 const rootDir = __dirname
 
@@ -113,15 +114,53 @@ if (!argOptions) {
   if (argOptions.help) showHelp = true
 }
 
+process.env.PORT = 4000
+process.env.HOST = 'localhost'
+process.env.NODE_ENV = 'development'
+process.env.ELASTICSEARCH = 'http://localhost:9200'
+process.env.REDIRECT_HTTPS = false
+
+if (argOptions.port) process.env.PORT = argOptions.port
+if (argOptions.host) process.env.HOST = argOptions.host
+if (argOptions.env) process.env.NODE_ENV = argOptions.env
+if (argOptions.elastic) process.env.ELASTICSEARCH = argOptions.elastic
+if (argOptions.callback) process.env.CALLBACK_URL = argOptions.callback
+if (argOptions.redirecthttps) process.env.REDIRECT_HTTPS = argOptions.redirecthttps
+if (argOptions.key) process.env.KEY = argOptions.key
+
+//  Here we are managing if we are going to skip the build step
+//  we'll want to do that if we are forcing a restart of the app.
+//  We force a restart if we detect files changing, but only on
+//  dev. We will need to set a flag to tell the difference between
+//  a forced exit we want and a crash
+let skipBuild = false
+global.doRestart = false
+if ('skipBuild' in argOptions && argOptions.skipBuild === true) {
+  skipBuild = true
+}
+
+let buildOnly = false
+if ('buildOnly' in argOptions && argOptions.buildOnly === true) {
+  buildOnly = true
+  skipBuild = false
+}
+
+let skipOpen = false
+if ('skipOpen' in argOptions && argOptions.skipOpen === true) {
+  skipOpen = true
+}
+
 /*
  * We need to make sure we have been passed a stub, this is the whole key on which we
  * base everything else
  */
-if (argOptions && !argOptions.key) {
-  console.log(
-    `\n\nYou must pass the 'key' parameter 'yarn start --key xxxxx' see the README.md for more details\n\n`
-    .error
-  )
+if (!process.env.KEY) {
+  console.log(`\n\nYou must pass the 'key' parameter 'npm start -- --key xxxxx --instance yyyyyyyy' see the README.md for more details\n\n`.error)
+  showHelp = true
+}
+
+if (!process.env.INSTANCE) {
+  console.log(`\n\nYou must pass the 'key' parameter 'npm start -- --key xxxxx --instance yyyyyyyy' see the README.md for more details\n\n`.error)
   showHelp = true
 }
 
@@ -150,43 +189,6 @@ Options:
  -h, --help             Displays this help text
   `)
   process.exit()
-}
-
-process.env.PORT = 4000
-process.env.HOST = 'localhost'
-process.env.NODE_ENV = 'development'
-process.env.ELASTICSEARCH = 'http://localhost:9200'
-process.env.REDIRECT_HTTPS = false
-
-if (argOptions.port) process.env.PORT = argOptions.port
-if (argOptions.host) process.env.HOST = argOptions.host
-if (argOptions.env) process.env.NODE_ENV = argOptions.env
-if (argOptions.elastic) process.env.ELASTICSEARCH = argOptions.elastic
-if (argOptions.redirecthttps) {
-  process.env.REDIRECT_HTTPS = argOptions.redirecthttps
-}
-process.env.KEY = argOptions.key
-
-//  Here we are managing if we are going to skip the build step
-//  we'll want to do that if we are forcing a restart of the app.
-//  We force a restart if we detect files changing, but only on
-//  dev. We will need to set a flag to tell the difference between
-//  a forced exit we want and a crash
-let skipBuild = false
-global.doRestart = false
-if ('skipBuild' in argOptions && argOptions.skipBuild === true) {
-  skipBuild = true
-}
-
-let buildOnly = false
-if ('buildOnly' in argOptions && argOptions.buildOnly === true) {
-  buildOnly = true
-  skipBuild = false
-}
-
-let skipOpen = false
-if ('skipOpen' in argOptions && argOptions.skipOpen === true) {
-  skipOpen = true
 }
 
 // ########################################################################
