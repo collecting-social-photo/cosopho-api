@@ -126,15 +126,6 @@ if (!process.env.NODE_ENV) process.env.NODE_ENV = 'development'
 if (!process.env.ELASTICSEARCH) process.env.ELASTICSEARCH = 'http://localhost:9200'
 if (!process.env.REDIRECT_HTTPS) process.env.REDIRECT_HTTPS = false
 
-console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
-console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
-console.log(process.env)
-console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
-console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
-console.log(argOptions)
-console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
-console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
-
 if (argOptions.port) process.env.PORT = argOptions.port
 if (argOptions.host) process.env.HOST = argOptions.host
 if (argOptions.env) process.env.NODE_ENV = argOptions.env
@@ -142,9 +133,6 @@ if (argOptions.elastic) process.env.ELASTICSEARCH = argOptions.elastic
 if (argOptions.callback) process.env.CALLBACK_URL = argOptions.callback
 if (argOptions.redirecthttps) process.env.REDIRECT_HTTPS = argOptions.redirecthttps
 if (argOptions.key) process.env.KEY = argOptions.key
-console.log(process.env)
-console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
-console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
 
 //  Here we are managing if we are going to skip the build step
 //  we'll want to do that if we are forcing a restart of the app.
