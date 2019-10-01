@@ -5,7 +5,7 @@
  * There is a lot of scripting at the top of this file, most of which
  * is to make sure the user has completed all the steps needed to
  * actually run the dashboard properly. This will be checking for
- * things like `yarn install` and the usual stuff having been run.
+ * things like `npm install` and the usual stuff having been run.
  *
  * You'll see!
  */
@@ -19,8 +19,8 @@ const rootDir = __dirname
 console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
 console.log('Making sure we are up to date, please wait...')
 const spawnSync = require('child_process').spawnSync
-const yarn = spawnSync('yarn', ['install'])
-console.log(yarn.stdout.toString())
+const npm = spawnSync('npm', ['install'])
+console.log(npm.stdout.toString())
 
 const colours = require('colors')
 
@@ -170,8 +170,8 @@ if (!process.env.KEY) {
  */
 if (showHelp) {
   console.log(`
-Usage: yarn start [options]
-       yarn start --key xxxxx --port 4000 --host localhost --env development --elastic http://localhost:9200
+Usage: npm start [options]
+       npm start --key xxxxx --port 4000 --host localhost --env development --elastic http://localhost:9200
 
 Options:
  -k, --key              The 'key' used to reference tables in the database, must be unique per app
