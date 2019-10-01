@@ -193,7 +193,7 @@ class User {
    * the details we want. The User object doesn't contain any values of the user
    * (yet) only methods that return json representations of the user.
    */
-  constructor () {}
+  constructor() {}
 
   /**
    * When we use auth0 to log a user in we get a JSON object back with _some_ of the user's
@@ -205,7 +205,7 @@ class User {
    * @returns {json} A better json representation of the user with the `user_metadata` field
    * that we want, that includes the user's roles and developer api token
    */
-  async get (auth0id) {
+  async get(auth0id) {
     //  Grab the id from the user object or a string
     let id = null
     if (typeof auth0id === 'object') {
@@ -215,7 +215,10 @@ class User {
     }
 
     //  Go and get the user from Auth0
+    console.log('About to get user from auth0')
     const user = await getUser(id)
+    console.log('Here is the user')
+    console.log(user)
 
     //  move over some of the data from auth0 to our template
     if (typeof auth0id === 'object') {
@@ -235,12 +238,12 @@ class User {
    * @param {json} roles The roles we wish to set on a user as a json object
    * @returns {json} A json representation of a user
    */
-  async setRoles (id, roles) {
+  async setRoles(id, roles) {
     const user = await setRoles(id, roles)
     return user
   }
 
-  async setLang (id, lang) {
+  async setLang(id, lang) {
     const user = await setLang(id, lang)
     return user
   }

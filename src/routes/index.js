@@ -149,7 +149,6 @@ router.use(function (req, res, next) {
   //  check to see if we are setting Auth0 settings and if
   //  not, redirect to the Auth0 form.
   let auth0 = configObj.get('auth0')
-  console.log(auth0)
   const handshake = configObj.get('handshake')
   if (auth0 === null || !auth0.AUTH0_CALLBACK_URL_API) {
     // Check to see if values are being posted to us
