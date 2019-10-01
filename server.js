@@ -43,61 +43,61 @@ console.log(`server.js exists in this directory: ${rootDir}`.help)
  * the port, host, environment and if we want to skip any build steps
  */
 const argOptionDefinitions = [{
-  name: 'key',
-  alias: 'k',
-  default: true,
-  type: String
-},
-{
-  name: 'port',
-  alias: 'p',
-  type: Number
-},
-{
-  name: 'host',
-  alias: 't',
-  type: String
-},
-{
-  name: 'env',
-  alias: 'e',
-  type: String
-},
-{
-  name: 'elastic',
-  alias: 'l',
-  type: String
-},
-{
-  name: 'callback',
-  alias: 'c',
-  type: String
-},
-{
-  name: 'skipBuild',
-  alias: 's',
-  type: Boolean
-},
-{
-  name: 'buildOnly',
-  alias: 'b',
-  type: Boolean
-},
-{
-  name: 'skipOpen',
-  alias: 'o',
-  type: Boolean
-},
-{
-  name: 'redirecthttps',
-  alias: 'r',
-  type: Boolean
-},
-{
-  name: 'help',
-  alias: 'h',
-  type: String
-}
+    name: 'key',
+    alias: 'k',
+    default: true,
+    type: String
+  },
+  {
+    name: 'port',
+    alias: 'p',
+    type: Number
+  },
+  {
+    name: 'host',
+    alias: 't',
+    type: String
+  },
+  {
+    name: 'env',
+    alias: 'e',
+    type: String
+  },
+  {
+    name: 'elastic',
+    alias: 'l',
+    type: String
+  },
+  {
+    name: 'callback',
+    alias: 'c',
+    type: String
+  },
+  {
+    name: 'skipBuild',
+    alias: 's',
+    type: Boolean
+  },
+  {
+    name: 'buildOnly',
+    alias: 'b',
+    type: Boolean
+  },
+  {
+    name: 'skipOpen',
+    alias: 'o',
+    type: Boolean
+  },
+  {
+    name: 'redirecthttps',
+    alias: 'r',
+    type: Boolean
+  },
+  {
+    name: 'help',
+    alias: 'h',
+    type: String
+  }
 ]
 
 /*
@@ -126,6 +126,15 @@ process.env.NODE_ENV = 'development'
 process.env.ELASTICSEARCH = 'http://localhost:9200'
 process.env.REDIRECT_HTTPS = false
 
+console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
+console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
+console.log(process.env)
+console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
+console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
+console.log(argOptions)
+console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
+console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
+
 if (argOptions.port) process.env.PORT = argOptions.port
 if (argOptions.host) process.env.HOST = argOptions.host
 if (argOptions.env) process.env.NODE_ENV = argOptions.env
@@ -133,6 +142,9 @@ if (argOptions.elastic) process.env.ELASTICSEARCH = argOptions.elastic
 if (argOptions.callback) process.env.CALLBACK_URL = argOptions.callback
 if (argOptions.redirecthttps) process.env.REDIRECT_HTTPS = argOptions.redirecthttps
 if (argOptions.key) process.env.KEY = argOptions.key
+console.log(process.env)
+console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
+console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
 
 //  Here we are managing if we are going to skip the build step
 //  we'll want to do that if we are forcing a restart of the app.
@@ -344,7 +356,7 @@ if (process.env.NODE_ENV === 'development') {
 
 const elasticsearch = require('elasticsearch')
 
-async function getConfig () {
+async function getConfig() {
   //  This is putting all the config into the global config object
   const esclient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH
@@ -439,11 +451,11 @@ p.then(res => {
   if (auth0 !== null && auth0.AUTH0_CALLBACK_URL_API) {
     // Configure Passport to use Auth0
     const strategy = new Auth0Strategy({
-      domain: auth0.AUTH0_DOMAIN,
-      clientID: auth0.AUTH0_CLIENT_ID,
-      clientSecret: auth0.AUTH0_SECRET,
-      callbackURL: auth0.AUTH0_CALLBACK_URL_API
-    },
+        domain: auth0.AUTH0_DOMAIN,
+        clientID: auth0.AUTH0_CLIENT_ID,
+        clientSecret: auth0.AUTH0_SECRET,
+        callbackURL: auth0.AUTH0_CALLBACK_URL_API
+      },
       (accessToken, refreshToken, extraParams, profile, done) => {
         return done(null, profile)
       }
