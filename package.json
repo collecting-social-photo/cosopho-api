@@ -37,7 +37,8 @@
     "marked": "^0.7.0",
     "mkdirp": "^0.5.1",
     "moment": "^2.20.1",
-    "node-sass": "^4.9.2",
+    "node-sass": "^4.12.0",
+    "npx": "^10.2.0",
     "opn": "^5.3.0",
     "passport": "^0.4.0",
     "passport-auth0": "^0.6.1",
@@ -67,13 +68,7 @@
     "watch-run": "^1.2.5"
   },
   "scripts": {
-    "build": "npm-run-all build:prod build:prod:css",
-    "build:prod": "babel src -d app",
-    "build:prod:css": "compass compile",
-    "build:dev": "npm-run-all -p build:dev:css build:dev:watch",
-    "build:dev:css": "compass watch",
-    "build:dev:watch": "watch-run -p 'src/**/*.js' 'npm run build'",
-    "start:dev": "nodemon server.js -i src -i app/public/scripts -i app/data -i config.json -i sessions",
-    "go": "npm-run-all -p build:dev start:dev"
+    "build": "babel src -d app && npx node-sass --output-style compressed ./src/sass/main.scss ./app/public/css/main.css && node copyfiles",
+    "heroku-postbuild": "babel src -d app && npx node-sass --output-style compressed ./src/sass/main.scss ./app/public/css/main.css && node copyfiles"
   }
 }
