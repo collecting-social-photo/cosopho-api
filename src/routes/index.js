@@ -201,8 +201,9 @@ router.use(function (req, res, next) {
   }
 
   //  Send over the graphQL host
-  if (auth0.AUTH0_CALLBACK_URL_API) req.templateValues.graphQLHost = auth0.AUTH0_CALLBACK_URL_API.replace('/callback', '')
-
+  if (auth0.AUTH0_CALLBACK_URL_API) {
+    req.templateValues.graphQLHost = auth0.AUTH0_CALLBACK_URL_API.replace('/callback', '')
+  }
   next()
 })
 
@@ -215,12 +216,14 @@ router.use(function (req, res, next) {
 const configObj = new Config()
 if (configObj.get('auth0') !== null) {
   const auth0Obj = configObj.get('auth0')
+  let AUTH0_CALLBACK_URL_API = auth0Obj.AUTH0_CALLBACK_URL_API
+  if (process.env.CALLBACK_URL) AUTH0_CALLBACK_URL_API = process.env.CALLBACK_URL
   router.get(
     '/login',
     passport.authenticate('auth0', {
       clientID: auth0Obj.AUTH0_CLIENT_ID,
       domain: auth0Obj.AUTH0_DOMAIN,
-      redirectUri: auth0Obj.AUTH0_CALLBACK_URL_API,
+      redirectUri: AUTH0_CALLBACK_URL_API,
       audience: `https://${auth0Obj.AUTH0_DOMAIN}/userinfo`,
       responseType: 'code',
       scope: 'openid profile'
