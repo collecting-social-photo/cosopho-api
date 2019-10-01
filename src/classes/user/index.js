@@ -11,8 +11,6 @@ const elasticsearch = require('elasticsearch')
  * @access private
  */
 const getUserSync = async id => {
-  console.log('In getUserSync')
-
   //  Make sure we have the user table in the database
   const esclient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH
@@ -30,7 +28,6 @@ const getUserSync = async id => {
 
   //  Get the user
   let user = null
-  console.log('Trying to get user')
   try {
     user = await esclient.get({
       index,
@@ -41,14 +38,10 @@ const getUserSync = async id => {
     user = null
   }
 
-  console.log('user == ')
-  console.log(user)
-
   //  If we have a user, return them
   if (user !== null) return user._source
 
   //  Otherwise we create them
-  console.log('Having to create the user')
   const d = new Date()
   const newUser = {
     id,
@@ -65,8 +58,6 @@ const getUserSync = async id => {
       doc_as_upsert: true
     }
   })
-  console.log('Now returning the user')
-  console.log(newUser)
   return newUser
 }
 
@@ -84,6 +75,7 @@ const setApiToken = async id => {
     .update(`${Math.random()}`)
     .digest('hex')
   await setKeyValue(id, 'apitoken', apitoken)
+  return apitoken
 }
 
 /**
@@ -159,12 +151,8 @@ const setKeyValue = async (id, key, value) => {
  * @access private
  */
 const getUser = async id => {
-  console.log('In gerUser')
   const config = new Config()
-  console.log('id: ', id)
   let user = await getUserSync(id)
-  console.log('user is now: ')
-  console.log(user)
 
   //  Check to see if we have set the admin user yet
   //  if not then we need to do that now
@@ -181,7 +169,6 @@ const getUser = async id => {
 
   //  Check to see if any roles have been set on the user, if not then
   //  apply the default roles
-  console.log('About to set roles')
   if (!user.roles) {
     const roles = {
       isAdmin: false,
@@ -191,16 +178,11 @@ const getUser = async id => {
     }
     user = await setRoles(id, roles)
   }
-  console.log('User after roles is now...')
-  console.log(user)
 
   //  Make sure we have a developer API token
   if (!user.apitoken) {
-    console.log('Setting api token')
-    user = await setApiToken(id)
+    user.apitoken = await setApiToken(id)
   }
-  console.log('User after api token is...')
-  console.log(user)
   return user
 }
 
@@ -234,11 +216,7 @@ class User {
     }
 
     //  Go and get the user from Auth0
-    console.log('About to get user from auth0')
-    console.log(id)
     const user = await getUser(id)
-    console.log('Here is the user')
-    console.log(user)
 
     //  move over some of the data from auth0 to our template
     if (typeof auth0id === 'object') {
