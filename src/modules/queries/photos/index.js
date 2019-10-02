@@ -32,7 +32,7 @@ const creatIndex = async () => {
  */
 const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   //  Make sure the index exists
-  creatIndex()
+  await creatIndex()
 
   const esclient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH
@@ -304,6 +304,8 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     body
   })
 
+  console.log('getting photos')
+  console.log(results)
   let total = null
   if (results.hits.total) total = results.hits.total
   if (results.hits.total.value) total = results.hits.total.value
