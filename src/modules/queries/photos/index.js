@@ -299,26 +299,20 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     if (mustNot.length) body.query.bool.must_not = mustNot
   }
 
-  console.log('About to get photos...')
   let results = null
   try {
     results = await esclient.search({
       index,
       body
     })
-  } catch (er) {
-    console.log('Failed to get photos with...')
-    console.log(er)
-  }
+  } catch (er) {}
 
-  console.log('getting photos')
-  console.log(results)
   let total = null
-  if (results.hits.total) total = results.hits.total
-  if (results.hits.total.value) total = results.hits.total.value
-  if (!results.hits || !results.hits.hits) {
+  if (!results || !results.hits || !results.hits.hits) {
     return []
   }
+  if (results.hits.total) total = results.hits.total
+  if (results.hits.total.value) total = results.hits.total.value
 
   const photos = results.hits.hits.map((photo) => photo._source)
   //  Now we need to go and get all the people for these photos
