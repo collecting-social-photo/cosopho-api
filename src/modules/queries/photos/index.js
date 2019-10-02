@@ -299,10 +299,17 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     if (mustNot.length) body.query.bool.must_not = mustNot
   }
 
-  let results = await esclient.search({
-    index,
-    body
-  })
+  console.log('About to get photos...')
+  let results = null
+  try {
+    results = await esclient.search({
+      index,
+      body
+    })
+  } catch (er) {
+    console.log('Failed to get photos with...')
+    console.log(er)
+  }
 
   console.log('getting photos')
   console.log(results)
