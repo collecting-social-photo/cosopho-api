@@ -250,29 +250,16 @@ const updateInstance = async (args, context, levelDown = 2, initialCall = false)
   })
   await delay(2000)
 
-  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-')
-  console.log('About to ping the front-end with an update request')
   //  Return back the values
   const newUpdatedInstance = await getInstance({
     id: args.id
   }, context)
   //  Check to see if we have an endpoint for this instance
   //  If so then we call it
-  console.log(global.config.auth0)
-  console.log(`AUTH0_CALLBACK_URL_${args.id}_FRONTEND`)
   if (global && global.config && global.config.auth0 && global.config.auth0[`AUTH0_CALLBACK_URL_${args.id}_FRONTEND`]) {
     const url = global.config.auth0[`AUTH0_CALLBACK_URL_${args.id}_FRONTEND`].replace('callback', `update/${global.config.handshake}`)
-    console.log('url: ', url)
     request(url,
       function (error, response, body) {
-        console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-')
-        console.log('error')
-        console.log(error)
-        console.log('response')
-        console.log(response)
-        console.log('body')
-        console.log(body)
-        console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-')
         if (error) {
           console.warn('error:', 'Frontend endpoint unreachable.')
           console.warn(url)
