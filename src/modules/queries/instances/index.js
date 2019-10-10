@@ -273,7 +273,6 @@ const updateInstance = async (args, context, levelDown = 2, initialCall = false)
         console.log('body')
         console.log(body)
         console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-')
-        console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-')
         if (error) {
           console.warn('error:', 'Frontend endpoint unreachable.')
           console.warn(url)
