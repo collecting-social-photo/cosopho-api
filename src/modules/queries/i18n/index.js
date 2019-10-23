@@ -3,7 +3,43 @@ const common = require('../common.js')
 const utils = require('../../utils')
 const request = require('request')
 
-const delay = require('delay')
+const pingCallback = (instance) => {
+  let callbackUrl = null
+  if (global && global.config && global.config.auth0 && global.config.auth0[`AUTH0_CALLBACK_URL_${instance}_FRONTEND`]) {
+    callbackUrl = global.config.auth0[`AUTH0_CALLBACK_URL_${instance}_FRONTEND`].replace('callback', `update/${global.config.handshake}`)
+    request(callbackUrl,
+      function (error, response, body) {
+        if (error) {
+          console.log('There was an error')
+          console.warn('error:', 'Frontend endpoint unreachable.')
+          console.warn(callbackUrl)
+        }
+      })
+  } else {
+    //  If there isn't a specific callback url, then we call back any frontend urls we can find
+    //  (because we've updated the main translations not an instance one, so they *all* need to know)
+    if (global && global.config && global.config.auth0) {
+      const urls = []
+      Object.entries(global.config.auth0).forEach((keyValue) => {
+        const key = keyValue[0]
+        const keySplit = key.split('_')
+        const frontend = keySplit.pop()
+        if (frontend === 'FRONTEND') urls.push(keyValue[1])
+      })
+      //  Loop through them calling each one
+      urls.forEach((url) => {
+        callbackUrl = url.replace('callback', `update/${global.config.handshake}`)
+        request(callbackUrl,
+          function (error, response, body) {
+            if (error) {
+              console.log('There was an error')
+              console.warn('error:', 'Frontend endpoint unreachable.')
+            }
+          })
+      })
+    }
+  }
+}
 
 /*
  *
@@ -270,11 +306,17 @@ const createString = async (args, context, levelDown = 2, initialCall = false) =
     index,
     type,
     id: newId,
+    refresh: true,
     body: {
       doc: newString,
       doc_as_upsert: true
     }
   })
+
+  //  Check to see if we have an endpoint for this instance
+  //  If so then we call it
+  pingCallback(instance)
+
   return newString
 }
 exports.createString = createString
@@ -311,13 +353,12 @@ const updateString = async (args, context, levelDown = 2, initialCall = false) =
     index,
     type,
     id: args.id,
+    refresh: true,
     body: {
       doc: updatedString,
       doc_as_upsert: true
     }
   })
-
-  await delay(2000)
 
   //  Return back the values
   const newUpdatedString = await getString({
@@ -328,41 +369,7 @@ const updateString = async (args, context, levelDown = 2, initialCall = false) =
   //  If so then we call it
   const idSplit = args.id.split('.')
   const instance = idSplit[0]
-  let callbackUrl = null
-  if (global && global.config && global.config.auth0 && global.config.auth0[`AUTH0_CALLBACK_URL_${instance}_FRONTEND`]) {
-    callbackUrl = global.config.auth0[`AUTH0_CALLBACK_URL_${instance}_FRONTEND`].replace('callback', `update/${global.config.handshake}`)
-    request(callbackUrl,
-      function (error, response, body) {
-        if (error) {
-          console.log('There was an error')
-          console.warn('error:', 'Frontend endpoint unreachable.')
-          console.warn(callbackUrl)
-        }
-      })
-  } else {
-    //  If there isn't a specific callback url, then we call back any frontend urls we can find
-    //  (because we've updated the main translations not an instance one, so they *all* need to know)
-    if (global && global.config && global.config.auth0) {
-      const urls = []
-      Object.entries(global.config.auth0).forEach((keyValue) => {
-        const key = keyValue[0]
-        const keySplit = key.split('_')
-        const frontend = keySplit.pop()
-        if (frontend === 'FRONTEND') urls.push(keyValue[1])
-      })
-      //  Loop through them calling each one
-      urls.forEach((url) => {
-        callbackUrl = url.replace('callback', `update/${global.config.handshake}`)
-        request(callbackUrl,
-          function (error, response, body) {
-            if (error) {
-              console.log('There was an error')
-              console.warn('error:', 'Frontend endpoint unreachable.')
-            }
-          })
-      })
-    }
-  }
+  pingCallback(instance)
 
   return newUpdatedString
 }
