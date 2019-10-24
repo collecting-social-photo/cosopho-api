@@ -233,13 +233,15 @@ if (configObj.get('auth0') !== null) {
   router.get('/logout', (req, res) => {
     req.logout()
     req.user = null
+    let CALLBACK_URL = auth0Obj.AUTH0_CALLBACK_URL_API
+    if (process.env.CALLBACK_URL) CALLBACK_URL = process.env.CALLBACK_URL
     req.session.destroy(function (err) {
       req.user = null
       req.session = null
       res.clearCookie('connect.sid')
-      res.redirect(`https://${auth0Obj.AUTH0_DOMAIN}/v2/logout?returnTo=${auth0Obj.AUTH0_CALLBACK_URL_API.replace('/callback', '')}`)
+      res.redirect(`https://${auth0Obj.AUTH0_DOMAIN}/v2/logout?returnTo=${CALLBACK_URL.replace('/callback', '')}`)
       if (err) {
-        res.redirect(`https://${auth0Obj.AUTH0_DOMAIN}/v2/logout?returnTo=${auth0Obj.AUTH0_CALLBACK_URL_API.replace('/callback', '')}`)
+        res.redirect(`https://${auth0Obj.AUTH0_DOMAIN}/v2/logout?returnTo=${CALLBACK_URL.replace('/callback', '')}`)
       }
     })
   })
