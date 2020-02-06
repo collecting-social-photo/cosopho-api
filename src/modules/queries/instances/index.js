@@ -181,7 +181,8 @@ const createInstance = async (args, context, levelDown = 2, initialCall = false)
   const newInstance = {
     id,
     created: d,
-    title: args.title
+    title: args.title,
+    slug: id
   }
   //  Now the optional ones
   if (args.colour) newInstance.colour = args.colour

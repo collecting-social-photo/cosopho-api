@@ -24,6 +24,7 @@ type Instance {
   title: String
   colour: String
   logo: String
+  slug: String
   languages: [String]
   defaultLanguage: String
   userFields: String
