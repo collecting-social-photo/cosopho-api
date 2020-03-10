@@ -200,7 +200,7 @@ router.use(function (req, res, next) {
   }
 
   //  Send over the graphQL host
-  if (auth0.AUTH0_CALLBACK_URL_API) {
+  if (auth0.AUTH0_CALLBACK_URL_API || process.env.CALLBACK_URL) {
     let CALLBACK_URL = auth0.AUTH0_CALLBACK_URL_API
     if (process.env.CALLBACK_URL) CALLBACK_URL = process.env.CALLBACK_URL
     req.templateValues.graphQLHost = CALLBACK_URL.replace('/callback', '')
