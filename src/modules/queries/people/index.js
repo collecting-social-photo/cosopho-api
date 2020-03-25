@@ -378,14 +378,24 @@ const createPerson = async (args, context, levelDown = 2, initialCall = false) =
     instance: args.instance
   }, context) === true) return null
 
+  const rootSlug = utils.slugify(args.username)
+
   //  Check to see if the username already exists
+  let makeExtraSlug = false
   const usernameUser = await getPerson({
     username: args.username,
     instance: args.instance
   }, context)
+  if (usernameUser) makeExtraSlug = true
+  const slugUser = await getPerson({
+    slug: rootSlug,
+    instance: args.instance
+  }, context)
+  if (slugUser) makeExtraSlug = true
+
   //  If we already have the username then we will need to make the stub unique
   let extraSlug = ''
-  if (usernameUser) {
+  if (makeExtraSlug) {
     extraSlug = crypto
       .createHash('sha512')
       .update(`${args.hashedPassword}-${process.env.KEY}`)
@@ -393,7 +403,7 @@ const createPerson = async (args, context, levelDown = 2, initialCall = false) =
       .slice(0, 6)
   }
 
-  const slug = `${utils.slugify(args.username).substring(0, 36)}${extraSlug}`
+  const slug = `${rootSlug.substring(0, 35)}-${extraSlug}`
 
   //  Make sure the index exists
   creatIndex()
