@@ -134,6 +134,8 @@ type Query {
     photos_archived: Boolean
     photos_page: Int
     photos_per_page: Int
+    suspended: Boolean
+    deleted: Boolean
   ): [Person]
 
   person(
@@ -149,6 +151,8 @@ type Query {
     photos_archived: Boolean
     photos_page: Int
     photos_per_page: Int
+    suspended: Boolean
+    deleted: Boolean
   ): Person
   checkPerson(
     id: String!
