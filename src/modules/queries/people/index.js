@@ -208,6 +208,8 @@ const getPerson = async (args, context, levelDown = 2, initialCall = false) => {
   if (args.username) newArgs.usernames = [args.username]
   if (args.email) newArgs.emails = [args.email]
   if (!args.id && !args.slug && !args.username && !args.email) return []
+  if ('suspended' in args) newArgs.suspended = args.suspended
+  if ('deleted' in args) newArgs.deleted = args.deleted
 
   //  Grab any 'photo' filters we want to pass through
   Object.entries(args).forEach((keyValue) => {
