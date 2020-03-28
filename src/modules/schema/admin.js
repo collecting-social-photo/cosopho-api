@@ -192,9 +192,11 @@ type Query {
     stub: String
     createdBy: String
     updateBy: String
+    fill: Boolean
   ): [I18n]
   string(
     id: String!
+    fill: Boolean
   ): I18n
 
 }

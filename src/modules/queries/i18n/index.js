@@ -78,6 +78,8 @@ const getStrings = async (args, context, levelDown = 2, initialCall = false) => 
   let page = common.getPage(args)
   let perPage = common.getPerPage(args)
 
+  if ('fill' in args && args.fill === true) perPage = 10000
+
   //  This is the base query
   const body = {
     from: page * perPage,
@@ -131,26 +133,50 @@ const getStrings = async (args, context, levelDown = 2, initialCall = false) => 
     })
   }
 
-  if ('instance' in args && args.instance !== '') {
-    must.push({
-      match: {
-        'instance': args.instance
-      }
-    })
-  }
-
-  if ('instances' in args && Array.isArray(args.instances)) {
+  //  If we have been asked to fill, then we are going to
+  //  make sure we always have the default languages
+  if ('fill' in args && args.fill === true) {
+    //  If we don't have an instances array we make one now
+    let instances = []
+    if (args.instances) {
+      if (Array.isArray(args.instances)) instances = [...instances, ...args.instances]
+      if (!Array.isArray(args.instances)) instances.push(args.instances)
+    }
+    //  If we have something in the instance then we need to add that to the instances array
+    if ('instance' in args && args.instance !== '') {
+      //  If we don't already have it
+      if (!instances.includes(args.instance)) instances.push(args.instance)
+    }
+    //  Now add the default "instance" in if it hasn't been already
+    if (!instances.includes(process.env.KEY)) instances.push(process.env.KEY)
+    //  Now add the instances on
     must.push({
       terms: {
-        'instance.keyword': args.instances
+        'instance.keyword': instances
       }
     })
+  } else {
+    if ('instance' in args && args.instance !== '') {
+      must.push({
+        match: {
+          'instance': args.instance
+        }
+      })
+    }
+
+    if ('instances' in args && Array.isArray(args.instances)) {
+      must.push({
+        terms: {
+          'instance.keyword': args.instances
+        }
+      })
+    }
   }
 
   if ('section' in args && args.make !== '') {
     must.push({
       match: {
-        'section.keyword': args.make
+        'section.keyword': args.section
       }
     })
   }
@@ -216,7 +242,44 @@ const getStrings = async (args, context, levelDown = 2, initialCall = false) => 
     return []
   }
 
-  const strings = results.hits.hits.map((string) => string._source)
+  let strings = results.hits.hits.map((string) => string._source)
+
+  //  If we had a fill, then we need to map the translated strings over
+  //  the top of the language strings
+  //  First we make a map of all the "root/default" strings
+  if ('fill' in args && args.fill === true) {
+    const baseStrings = {}
+    const layerStrings = {}
+    strings.forEach((row) => {
+      if (row.instance === process.env.KEY) {
+        baseStrings[row.id] = row
+      } else {
+        layerStrings[row.id] = row
+      }
+    })
+    //  Now we go through all the layerStrings, to see if we can put
+    //  them over the top of the baseString
+    Object.entries(layerStrings).forEach((row) => {
+      const record = row[1]
+      //  Turn the id into protentially the original version
+      const newId = record.id.replace(record.instance, process.env.KEY)
+      //  If this exists in the base layer, then we need to put the string
+      //  over the top of the base one
+      if (baseStrings[newId]) {
+        baseStrings[newId].string = record.string
+      } else {
+        //  Otherwise, if it somehow doesn't exist then we need to make it
+        //  a new one
+        record.id = newId
+        record.token = record.token.replace(record.instance, process.env.KEY)
+        record.instance = process.env.KEY
+        baseStrings[newId] = JSON.parse(JSON.stringify(record))
+      }
+    })
+    //  Now turn the baseStrings object back into an array
+    strings = Object.entries(baseStrings).map((row) => row[1])
+    total = strings.length
+  }
 
   //  Finally, add the pagination information
   const sys = {
