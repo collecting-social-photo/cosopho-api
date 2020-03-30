@@ -92,6 +92,14 @@ const getPeople = async (args, context, levelDown = 2, initialCall = false) => {
     })
   }
 
+  if ('instances' in args && Array.isArray(args.instances)) {
+    must.push({
+      terms: {
+        'instance.keyword': args.instances
+      }
+    })
+  }
+
   if ('deleted' in args) {
     if (args.deleted === true) {
       must.push({

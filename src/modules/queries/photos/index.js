@@ -137,6 +137,14 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     })
   }
 
+  if ('instances' in args && Array.isArray(args.instances)) {
+    must.push({
+      terms: {
+        'instance.keyword': args.instances
+      }
+    })
+  }
+
   if ('make' in args && args.make !== '') {
     must.push({
       match: {
@@ -318,10 +326,12 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   //  Now we need to go and get all the people for these photos
   if (levelDown < 2) {
     const peopleSlugs = [...new Set(photos.map((photo) => photo.personSlug))] // unique array
-    const photosPeople = await people.getPeople({
-      instance: args.instance,
+    const peopleQuery = {
       slugs: peopleSlugs
-    }, context)
+    }
+    if (args.instance) peopleQuery.instance = args.instance
+    if (args.instances && Array.isArray(args.instances)) peopleQuery.instances = args.instances
+    const photosPeople = await people.getPeople(peopleQuery, context)
 
     if (photosPeople) {
       photosPeople.forEach((person) => {

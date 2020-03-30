@@ -168,6 +168,7 @@ type Query {
     ${base.query.photosInner}
     ids: [String]
     instance: String
+    instances: [String]
     reviewed: Boolean
     approved: Boolean
     homepage: Boolean

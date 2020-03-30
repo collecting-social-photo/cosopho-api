@@ -43,6 +43,7 @@ type Query {
   photos(
     ids: [String]
     instance: String!
+    instances: [String]
     ${base.query.photosInner}
   ): [Photo]
   photo(
