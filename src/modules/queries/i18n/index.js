@@ -364,7 +364,7 @@ const createString = async (args, context, levelDown = 2, initialCall = false) =
   console.log(newString)
   console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
   console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
-
+  console.log('process.env.ELASTICSEARCH: ', process.env.ELASTICSEARCH)
   //  Do some EXIF stuff here if we can
   const esclient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH
