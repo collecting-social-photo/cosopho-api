@@ -356,33 +356,16 @@ const createString = async (args, context, levelDown = 2, initialCall = false) =
     language: args.language,
     created: new Date(),
     string: unescape(args.string),
-    createdBy: context.userId
+    createdBy: 0
   }
 
-  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
-  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
-  console.log(newString)
-  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
-  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
-  console.log('process.env.ELASTICSEARCH: ', process.env.ELASTICSEARCH)
   //  Do some EXIF stuff here if we can
   const esclient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH
   })
   const index = `i18ns_${process.env.KEY}`
   const type = 'string'
-  console.log('About to call add')
-  console.log(JSON.stringify({
-    index,
-    type,
-    id: newId,
-    refresh: true,
-    body: {
-      doc: newString,
-      doc_as_upsert: true
-    }
-  }, null, 4))
-  const result = await esclient.update({
+  await esclient.update({
     index,
     type,
     id: newId,
@@ -392,10 +375,6 @@ const createString = async (args, context, levelDown = 2, initialCall = false) =
       doc_as_upsert: true
     }
   })
-  console.log('Finished calling add')
-  console.log(result)
-  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
-  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
 
   //  Check to see if we have an endpoint for this instance
   //  If so then we call it
@@ -431,25 +410,8 @@ const updateString = async (args, context, levelDown = 2, initialCall = false) =
     updated: new Date(),
     updatedBy: context.userId
   }
-  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
-  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
-  console.log(updatedString)
-  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
-  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
-  console.log('process.env.ELASTICSEARCH: ', process.env.ELASTICSEARCH)
-  console.log('About to call update')
-  console.log(JSON.stringify({
-    index,
-    type,
-    id: args.id,
-    refresh: true,
-    body: {
-      doc: updatedString,
-      doc_as_upsert: true
-    }
-  }, null, 4))
   //  Update the thing
-  const result = await esclient.update({
+  await esclient.update({
     index,
     type,
     id: args.id,
@@ -459,10 +421,6 @@ const updateString = async (args, context, levelDown = 2, initialCall = false) =
       doc_as_upsert: true
     }
   })
-  console.log('Finished calling update')
-  console.log(result)
-  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
-  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
 
   //  Return back the values
   const newUpdatedString = await getString({
