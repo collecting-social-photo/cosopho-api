@@ -371,7 +371,17 @@ const createString = async (args, context, levelDown = 2, initialCall = false) =
   })
   const index = `i18ns_${process.env.KEY}`
   const type = 'string'
-  console.log('About to call update')
+  console.log('About to call add')
+  console.log(JSON.stringify({
+    index,
+    type,
+    id: newId,
+    refresh: true,
+    body: {
+      doc: newString,
+      doc_as_upsert: true
+    }
+  }, null, 4))
   const result = await esclient.update({
     index,
     type,
@@ -382,7 +392,7 @@ const createString = async (args, context, levelDown = 2, initialCall = false) =
       doc_as_upsert: true
     }
   })
-  console.log('Finished calling update')
+  console.log('Finished calling add')
   console.log(result)
   console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
   console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
@@ -421,9 +431,25 @@ const updateString = async (args, context, levelDown = 2, initialCall = false) =
     updated: new Date(),
     updatedBy: context.userId
   }
-
+  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
+  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
+  console.log(updatedString)
+  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
+  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
+  console.log('process.env.ELASTICSEARCH: ', process.env.ELASTICSEARCH)
+  console.log('About to call update')
+  console.log(JSON.stringify({
+    index,
+    type,
+    id: args.id,
+    refresh: true,
+    body: {
+      doc: updatedString,
+      doc_as_upsert: true
+    }
+  }, null, 4))
   //  Update the thing
-  await esclient.update({
+  const result = await esclient.update({
     index,
     type,
     id: args.id,
@@ -433,6 +459,10 @@ const updateString = async (args, context, levelDown = 2, initialCall = false) =
       doc_as_upsert: true
     }
   })
+  console.log('Finished calling update')
+  console.log(result)
+  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
+  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
 
   //  Return back the values
   const newUpdatedString = await getString({
