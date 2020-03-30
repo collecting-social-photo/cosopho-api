@@ -359,13 +359,19 @@ const createString = async (args, context, levelDown = 2, initialCall = false) =
     createdBy: context.userId
   }
 
+  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
+  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
+  console.log(newString)
+  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
+  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
+
   //  Do some EXIF stuff here if we can
   const esclient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH
   })
   const index = `i18ns_${process.env.KEY}`
   const type = 'string'
-  await esclient.update({
+  const result = await esclient.update({
     index,
     type,
     id: newId,
@@ -375,6 +381,9 @@ const createString = async (args, context, levelDown = 2, initialCall = false) =
       doc_as_upsert: true
     }
   })
+  console.log(result)
+  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
+  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
 
   //  Check to see if we have an endpoint for this instance
   //  If so then we call it
