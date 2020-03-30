@@ -371,6 +371,7 @@ const createString = async (args, context, levelDown = 2, initialCall = false) =
   })
   const index = `i18ns_${process.env.KEY}`
   const type = 'string'
+  console.log('About to call update')
   const result = await esclient.update({
     index,
     type,
@@ -381,6 +382,7 @@ const createString = async (args, context, levelDown = 2, initialCall = false) =
       doc_as_upsert: true
     }
   })
+  console.log('Finished calling update')
   console.log(result)
   console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
   console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
