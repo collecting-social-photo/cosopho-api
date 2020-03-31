@@ -153,7 +153,7 @@ const getPeople = async (args, context, levelDown = 2, initialCall = false) => {
     return []
   }
 
-  const people = results.hits.hits.map((person) => person._source)
+  let people = results.hits.hits.map((person) => person._source)
 
   //  Now we need to go and get all the photos for each person
   if (levelDown < 2) {
@@ -183,6 +183,12 @@ const getPeople = async (args, context, levelDown = 2, initialCall = false) => {
       })
     }
   }
+
+  //  Add in the sessionID
+  people = people.map((person) => {
+    person.sessionId = utils.getSessionId(person.id)
+    return person
+  })
 
   //  Finally, add the pagination information
   const sys = {

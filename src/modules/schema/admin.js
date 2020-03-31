@@ -50,6 +50,7 @@ type Person {
   placeOfBirth: String
   suspended: Boolean
   deleted: Boolean
+  sessionId: String
 }
 
 type Photo {
