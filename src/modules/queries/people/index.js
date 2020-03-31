@@ -306,6 +306,13 @@ const checkPerson = async (args, context) => {
 }
 exports.checkPerson = checkPerson
 
+const getPersonId = async (args, context) => {
+  context.checkOnly = true
+  const person = await getPerson(args, context)
+  return person
+}
+exports.getPersonId = getPersonId
+
 const checkPersonAPI = async (args, context) => {
   context.checkOnly = true
   const person = await getPerson(args, context)
