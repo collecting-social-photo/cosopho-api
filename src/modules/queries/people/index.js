@@ -48,8 +48,8 @@ const getPeople = async (args, context, levelDown = 2, initialCall = false) => {
   }
 
   //  These are things we must find
-  const must = []
-  const mustNot = []
+  let must = []
+  let mustNot = []
 
   //  If we are looking for a bunch of ids, then we do that here
   if ('ids' in args && Array.isArray(args.ids)) {
@@ -132,6 +132,45 @@ const getPeople = async (args, context, levelDown = 2, initialCall = false) => {
     }
   }
 
+  /*
+    Are we allowed to see deleted and suspended user?
+    We are allowed to see them if...
+
+    1.  The call is signed and is signed with an id
+        that matches the signedId
+  */
+  if (context.signed && process.env.SIGNEDID && context.signed === utils.getSessionId(process.env.SIGNEDID)) {
+    //  We have a signature from the calling user
+    //  We have signedId in the ENV
+    //  The signature version of the signedId matches the calling user
+    //  So everything is fine
+  } else {
+    //  Otherwise, we are NOT allowed to see this user
+    //  Step 1. Remove any deleted or suspended calls we already have in the must and mustnot
+    //  query
+    must = must.filter((q) => {
+      if (q.match && q.match.deleted) return false
+      if (q.match && q.match.suspended) return false
+      return true
+    })
+    mustNot = mustNot.filter((q) => {
+      if (q.match && q.match.deleted) return false
+      if (q.match && q.match.suspended) return false
+      return true
+    })
+    //  Now add that filter back in
+    mustNot.push({
+      match: {
+        'deleted': true
+      }
+    })
+    mustNot.push({
+      match: {
+        'suspended': true
+      }
+    })
+  }
+
   //  If we have something with *must* do, then we add that
   //  to the search
   if (must.length > 0 || mustNot.length > 0) {
@@ -187,6 +226,21 @@ const getPeople = async (args, context, levelDown = 2, initialCall = false) => {
   //  Add in the sessionID
   people = people.map((person) => {
     person.sessionId = utils.getSessionId(person.id)
+    return person
+  })
+
+  //  Strip things out if we are unsigned
+  const strippedFields = ['email', 'dateOfBirth', 'placeOfBirth', 'suspended', 'deleted', 'sessionId']
+  people = people.map((person) => {
+    const thisPersonsSessionId = utils.getSessionId(person.id)
+    let canSee = false
+    if (context.signed && process.env.SIGNEDID && context.signed === utils.getSessionId(process.env.SIGNEDID)) canSee = true
+    if (context.signed && context.signed === thisPersonsSessionId) canSee = true
+    if (canSee === false) {
+      strippedFields.forEach((field) => {
+        delete person[field]
+      })
+    }
     return person
   })
 
@@ -270,11 +324,25 @@ exports.checkPersonAPI = checkPersonAPI
 
 const updatePerson = async (args, context, levelDown = 2, initialCall = false) => {
   //  Make sure we are an admin user, as only admin users are allowed to create them
-  if (!context.userRoles || !context.userRoles.isAdmin || context.userRoles.isAdmin === false) return []
+  if (!context.userRoles || !context.userRoles.isAdmin || context.userRoles.isAdmin === false) return null
+
+  //  If this is unsigned then we can't let them do it
+  if (context.signed === null) return null
 
   //  We must have an id
   if (!args.id) return null
   if (!args.instance) return null
+
+  //  If we are signed by a user, and that user doesn't match then we need to reject it
+  let canEdit = false
+  let isAdminUser = false
+  if (context.signed === utils.getSessionId(args.id)) canEdit = true
+  if (process.env.SIGNEDID && context.signed === utils.getSessionId(process.env.SIGNEDID)) {
+    canEdit = true
+    isAdminUser = true
+  }
+  //  If we can't edit, or we're not an admin user then reject this
+  if (canEdit === false && isAdminUser === false) return null
 
   //  Check the instance exists
   const checkInstance = await instances.checkInstance({
@@ -302,7 +370,7 @@ const updatePerson = async (args, context, levelDown = 2, initialCall = false) =
   }
 
   //  These are the fields that can be updated
-  const keys = [
+  let keys = [
     'email',
     'dateOfBirth',
     'placeOfBirth',
@@ -318,6 +386,11 @@ const updatePerson = async (args, context, levelDown = 2, initialCall = false) =
     'suspended',
     'deleted'
   ]
+  //  Limit those records if we are the user but not the admin user
+  if (canEdit === true && isAdminUser === false) {
+    delete args.suspended
+    delete args.deleted
+  }
 
   //  Check to see if we have a new value, if so add it to the update record obj
   keys.forEach((key) => {
@@ -399,6 +472,12 @@ const updatePerson = async (args, context, levelDown = 2, initialCall = false) =
     id: args.id,
     instance: args.instance
   }, context)
+  //  If we are not an admin user, then we are not allowed to see
+  //  the deleted and suspended fields
+  if (isAdminUser === false) {
+    delete newUpdatedPerson.deleted
+    delete newUpdatedPerson.suspended
+  }
   return newUpdatedPerson
 }
 exports.updatePerson = updatePerson
@@ -414,6 +493,11 @@ const createPerson = async (args, context, levelDown = 2, initialCall = false) =
 
   //  Make sure we have a username and password
   if (!args.username || !args.instance || !args.id) return null
+
+  //  We can only create a user if we are signed in with the main site session
+  if (context.signed === null) return null
+  if (!process.env.SIGNEDID) return null
+  if (context.signed !== utils.getSessionId(process.end.SIGNEDID)) return null
 
   //  Check the instance exists
   const checkInstance = await instances.checkInstance({
