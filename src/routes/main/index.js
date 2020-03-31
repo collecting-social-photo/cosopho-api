@@ -1,4 +1,7 @@
+const utils = require('../../modules/utils')
+
 exports.index = (req, res) => {
+  req.templateValues.signedId = utils.getSessionId(process.env.SIGNEDID)
   return res.render('main/index', req.templateValues)
 }
 

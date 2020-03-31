@@ -1,4 +1,6 @@
 /* eslint no-useless-escape: 0 */
+const crypto = require('crypto')
+
 exports.slugify = (string) => {
   const a = 'àáäâãåăæçèéëêǵḧìíïîḿńǹñòóöôœṕŕßśșțùúüûǘẃẍÿź·/_,:;'
   const b = 'aaaaaaaaceeeeghiiiimnnnoooooprssstuuuuuwxyz------'
@@ -12,4 +14,13 @@ exports.slugify = (string) => {
     .replace(/\-\-+/g, '-') // Replace multiple - with single -
     .replace(/^-+/, '') // Trim - from start of text
     .replace(/-+$/, '') // Trim - from end of text
+}
+
+exports.getSessionId = (id) => {
+  return crypto
+    .createHash('sha512')
+    .update(`${id}-${process.env.KEY}`)
+    .digest('base16')
+    .toString('hex')
+    .slice(0, 32)
 }

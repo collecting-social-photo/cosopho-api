@@ -375,13 +375,14 @@ const root = {
 
 //  This figures out a bunch of stuff around which queries we can run
 //  and the user context
-const getGrpObj = (isPlayground, userId, userRoles, token) => {
+const getGrpObj = (isPlayground, userId, userRoles, token, signed) => {
   const grpObj = {
     rootValue: root,
     context: {
       userId,
       userRoles,
-      token
+      token,
+      signed
     },
     userRoles,
     graphiql: isPlayground
@@ -453,9 +454,16 @@ const getUser = async (token) => {
 //  the headers, then call the function
 router.use('/graphql', bodyParser.json(), expressGraphql(async (req) => {
   let token = null
+  let signed = null
+
   if (req && req.headers && req.headers.authorization) {
     const tokenSplit = req.headers.authorization.split(' ')
     if (tokenSplit[1]) token = tokenSplit[1]
+    const secondTokenSplit = token.split('-')
+    if (secondTokenSplit.length === 2) {
+      token = secondTokenSplit[0]
+      signed = secondTokenSplit[1]
+    }
   }
 
   //  grab the user from the token
@@ -471,18 +479,34 @@ router.use('/graphql', bodyParser.json(), expressGraphql(async (req) => {
       }
     }
   }
-  return (getGrpObj(false, user.id, user.roles, token))
+  return (getGrpObj(false, user.id, user.roles, token, signed))
 }))
 
 //  If we are coming from the playground, then we pull the token from the URL
 //  then call the function
 router.use('/:token/playground', bodyParser.json(), expressGraphql(async (req) => {
   //  grab the user from the token
-  let user = await getUser(req.params.token)
+  let token = null
+  let signed = null
+  if (req.params.token) {
+    const tokenSplit = req.params.token.split(' ')
+    if (tokenSplit[1]) {
+      token = tokenSplit[1]
+    } else {
+      token = tokenSplit[0]
+    }
+    const secondTokenSplit = token.split('-')
+    if (secondTokenSplit.length === 2) {
+      token = secondTokenSplit[0]
+      signed = secondTokenSplit[1]
+    }
+  }
+
+  let user = await getUser(token)
 
   //  If the token is the handshake, then we'll mark the user as an admin for
   //  this call
-  if (req.params.token === process.env.HANDSHAKE) {
+  if (token === process.env.HANDSHAKE) {
     user = {
       id: 0,
       roles: {
@@ -507,7 +531,7 @@ router.use('/:token/playground', bodyParser.json(), expressGraphql(async (req) =
 
   //  call the query method passing in the playground toggle, user roles and
   //  token for tracking
-  return (getGrpObj(true, user.id, user.roles, req.params.token))
+  return (getGrpObj(true, user.id, user.roles, token, signed))
 }))
 
 // ############################################################################
