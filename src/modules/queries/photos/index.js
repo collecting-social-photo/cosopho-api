@@ -1,9 +1,9 @@
 const elasticsearch = require('elasticsearch')
 const common = require('../common.js')
+const utils = require('../../../modules/utils')
 
 // const utils = require('../../../modules/utils')
 const crypto = require('crypto')
-const delay = require('delay')
 
 /*
  *
@@ -76,9 +76,33 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     }
   }
 
+  //  If we have been passed a slug, and we have a signed api call
+  //  and it's signed by a user not an admin, then we're going to need
+  //  to fetch the id of the user
+  let uniquePersonSlug = null
+  if (context.signed && process.env.SIGNEDID && context.signed !== utils.getSessionId(process.env.SIGNEDID)) {
+    //  We are a logged in user
+    //  Check to see if we have been passed a slug
+    if (args.peopleSlugs) {
+      if (Array.isArray(args.peopleSlugs) && args.peopleSlugs.length === 1) uniquePersonSlug = args.peopleSlugs[0]
+      if (!Array.isArray(args.peopleSlugs)) uniquePersonSlug = args.peopleSlugs
+      if (uniquePersonSlug.trim() === '') uniquePersonSlug = null
+    }
+  }
+  //  If we have uniquePersonSlug see if we can get the ids
+  let uniquePersonId = null
+  if (uniquePersonSlug) {
+    const contextCopy = JSON.parse(JSON.stringify(context))
+    contextCopy.signed = utils.getSessionId(process.env.SIGNEDID) // Sign the next call with the admin API token
+    const checkUser = await people.getPersonId({
+      slug: uniquePersonSlug
+    }, contextCopy)
+    if (checkUser && checkUser.id) uniquePersonId = checkUser.id
+  }
+
   //  These are things we must find
-  const must = []
-  const mustNot = []
+  let must = []
+  let mustNot = []
 
   //  If we are looking for a bunch of ids, then we do that here
   if ('ids' in args && Array.isArray(args.ids)) {
@@ -281,6 +305,91 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     }
   }
 
+  /*
+    Are we allowed to see deleted and suspended user?
+    We are allowed to see them if...
+
+    1.  The call is signed and is signed with an id
+        that matches the signedId
+  */
+  if (context.signed && process.env.SIGNEDID && context.signed === utils.getSessionId(process.env.SIGNEDID)) {
+    //  We have a signature from the calling user
+    //  We have signedId in the ENV
+    //  The signature version of the signedId matches the calling user
+    //  So everything is fine
+  } else {
+    //  Otherwise, we are NOT allowed to see this user
+    //  Step 1. Remove any approved, ownerDeleted, deleted, suspended calls we already have in the must and mustnot
+    //  query
+    must = must.filter((q) => {
+      if (q.match && q.match.approved) return false
+      if (q.match && q.match.ownerDeleted) return false
+      if (q.match && q.match.deleted) return false
+      if (q.match && q.match.archived) return false
+      return true
+    })
+    mustNot = mustNot.filter((q) => {
+      if (q.match && q.match.approved) return false
+      if (q.match && q.match.ownerDeleted) return false
+      if (q.match && q.match.deleted) return false
+      if (q.match && q.match.archived) return false
+      return true
+    })
+
+    //  Now we need to work out if we are getting photos for a single
+    //  user, if we are, then see if that user is the logged in user
+    //  if so then we can allow archived photos
+
+    //  Now add that filter back in
+    must.push({
+      match: {
+        'approved': true
+      }
+    })
+    mustNot.push({
+      match: {
+        'ownerDeleted': true
+      }
+    })
+    mustNot.push({
+      match: {
+        'deleted': true
+      }
+    })
+    mustNot.push({
+      match: {
+        'archived': true
+      }
+    })
+  }
+
+  //  If we are signed in, and either the admin user, or the owner
+  //  and we are making a single user call, then we can respect the
+  //  archived flag if we have one
+  if (context.signed) {
+    if ((process.env.SIGNEDID && context.signed === utils.getSessionId(process.env.SIGNEDID)) || (uniquePersonId && context.signed === utils.getSessionId(uniquePersonId))) {
+      //  Remove any archived filter already have
+      must = must.filter((q) => !(q.match && q.match.archived))
+      mustNot = mustNot.filter((q) => !(q.match && q.match.archived))
+
+      if ('archived' in args) {
+        if (args.archived === true) {
+          must.push({
+            match: {
+              'archived': true
+            }
+          })
+        } else {
+          mustNot.push({
+            match: {
+              'archived': true
+            }
+          })
+        }
+      }
+    }
+  }
+
   if ('homepage' in args) {
     if (args.homepage === true) {
       must.push({
@@ -392,6 +501,9 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
   //  Make sure we have an instance and title
   if (!args.instance || !args.personSlug || !args.initiative || !args.title) return null
 
+  //  We can only create a photo if we are signed in with the main site session
+  if (context.signed === null) return null
+
   //  Check the instance exists
   const checkInstance = await instances.checkInstance({
     id: args.instance
@@ -411,6 +523,27 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
     instance: args.instance
   }, context)
   if (!checkPerson) return null
+
+  //  Grab the id of the user we are about to try and get
+  let uniquePersonId = null
+  const contextCopy = JSON.parse(JSON.stringify(context))
+  contextCopy.signed = utils.getSessionId(process.env.SIGNEDID) // Sign the next call with the admin API token
+  //  Grab the user of this slug
+  const checkId = await people.getPersonId({
+    slug: args.personSlug
+  }, contextCopy)
+  //  record the id of the user we are about to create a photo for
+  if (checkId && checkId.id) uniquePersonId = checkId.id
+
+  //  If the uniquePersonId is different from the signed in
+  //  user's then we can't create this photo
+  let canCreate = false
+  //  If the signature is the same as the user we are attempting to create a photo for
+  if (context.signed === utils.getSessionId(uniquePersonId)) canCreate = true
+  //  If we are signed in as the main site...
+  if (context.signed && process.env.SIGNEDID && context.signed === utils.getSessionId(process.env.SIGNEDID)) canCreate = true
+  //  If either of the above isn't true, then we can't create a photo as this user
+  if (!canCreate) return null
 
   const newId = crypto
     .createHash('sha512')
@@ -487,14 +620,44 @@ const updatePhoto = async (args, context, levelDown = 2, initialCall = false) =>
   if (!args.id) return null
   if (!args.instance) return null
 
+  //  We can only create a photo if we are signed in with the main site session
+  if (context.signed === null) return null
+
   //  Check the instance exists
   const checkInstance = await instances.checkInstance({
     id: args.instance
   }, context)
   if (!checkInstance) return null
 
+  const checkPhoto = await getPhoto({
+    id: args.id,
+    instance: args.instance
+  }, context)
+  if (!checkPhoto || !checkPhoto.personSlug) return null
+
   //  Make sure the index exists
   creatIndex()
+
+  //  Grab the id of the user we are about to try and get
+  let uniquePersonId = null
+  const contextCopy = JSON.parse(JSON.stringify(context))
+  contextCopy.signed = utils.getSessionId(process.env.SIGNEDID) // Sign the next call with the admin API token
+  //  Grab the user of this slug
+  const checkId = await people.getPersonId({
+    slug: checkPhoto.personSlug
+  }, contextCopy)
+  //  record the id of the user we are about to create a photo for
+  if (checkId && checkId.id) uniquePersonId = checkId.id
+
+  //  If the uniquePersonId is different from the signed in
+  //  user's then we can't create this photo
+  let canCreate = false
+  //  If the signature is the same as the user we are attempting to create a photo for
+  if (context.signed === utils.getSessionId(uniquePersonId)) canCreate = true
+  //  If we are signed in as the main site...
+  if (context.signed && process.env.SIGNEDID && context.signed === utils.getSessionId(process.env.SIGNEDID)) canCreate = true
+  //  If either of the above isn't true, then we can't create a photo as this user
+  if (!canCreate) return null
 
   const esclient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH
@@ -540,13 +703,12 @@ const updatePhoto = async (args, context, levelDown = 2, initialCall = false) =>
     index,
     type,
     id: args.id,
+    refresh: true,
     body: {
       doc: updatedPhoto,
       doc_as_upsert: true
     }
   })
-
-  await delay(2000)
 
   //  Return back the values
   const newUpdatedPhoto = await getPhoto({
@@ -570,6 +732,9 @@ const deletePhoto = async (args, context, levelDown = 2, initialCall = false) =>
   if (!args.id) return null
   if (!args.instance) return null
 
+  //  We can only delete a photo if we are signed in with the main site session
+  if (context.signed === null) return null
+
   //  Check the instance exists
   const checkInstance = await instances.checkInstance({
     id: args.instance
@@ -578,6 +743,33 @@ const deletePhoto = async (args, context, levelDown = 2, initialCall = false) =>
 
   //  Make sure the index exists
   creatIndex()
+
+  const checkPhoto = await getPhoto({
+    id: args.id,
+    instance: args.instance
+  }, context)
+  if (!checkPhoto || !checkPhoto.personSlug) return null
+
+  //  Grab the id of the user we are about to try and get
+  let uniquePersonId = null
+  const contextCopy = JSON.parse(JSON.stringify(context))
+  contextCopy.signed = utils.getSessionId(process.env.SIGNEDID) // Sign the next call with the admin API token
+  //  Grab the user of this slug
+  const checkId = await people.getPersonId({
+    slug: checkPhoto.personSlug
+  }, contextCopy)
+  //  record the id of the user we are about to delete a photo of
+  if (checkId && checkId.id) uniquePersonId = checkId.id
+
+  //  If the uniquePersonId is different from the signed in
+  //  user's then we can't delete this photo
+  let canDelete = false
+  //  If the signature is the same as the user we are attempting to delete photo of
+  if (context.signed === utils.getSessionId(uniquePersonId)) canDelete = true
+  //  If we are signed in as the main site...
+  if (context.signed && process.env.SIGNEDID && context.signed === utils.getSessionId(process.env.SIGNEDID)) canDelete = true
+  //  If either of the above isn't true, then we can't delete this photo as this user
+  if (!canDelete) return null
 
   const esclient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH
