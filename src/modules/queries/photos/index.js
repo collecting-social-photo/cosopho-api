@@ -86,7 +86,7 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     if (args.peopleSlugs) {
       if (Array.isArray(args.peopleSlugs) && args.peopleSlugs.length === 1) uniquePersonSlug = args.peopleSlugs[0]
       if (!Array.isArray(args.peopleSlugs)) uniquePersonSlug = args.peopleSlugs
-      if (uniquePersonSlug.trim() === '') uniquePersonSlug = null
+      if (uniquePersonSlug & uniquePersonSlug.trim() === '') uniquePersonSlug = null
     }
   }
   //  If we have uniquePersonSlug see if we can get the ids
