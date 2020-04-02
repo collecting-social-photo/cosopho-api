@@ -391,8 +391,7 @@ const updatePerson = async (args, context, levelDown = 2, initialCall = false) =
     'personalSite',
     'bio',
     'suspended',
-    'deleted',
-    'slug'
+    'deleted'
   ]
   //  Limit those records if we are the user but not the admin user
   if (canEdit === true && isAdminUser === false) {
