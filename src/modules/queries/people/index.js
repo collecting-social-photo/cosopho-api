@@ -231,10 +231,6 @@ const getPeople = async (args, context, levelDown = 2, initialCall = false) => {
 
   //  Strip things out if we are unsigned
   const strippedFields = ['email', 'dateOfBirth', 'placeOfBirth', 'suspended', 'deleted', 'sessionId']
-  console.log('-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-')
-  console.log('context.signed: ', context.signed)
-  console.log('process.env.SIGNEDID: ', process.env.SIGNEDID)
-  console.log('utils.getSessionId(process.env.SIGNEDID): ', utils.getSessionId(process.env.SIGNEDID))
   people = people.map((person) => {
     const thisPersonsSessionId = utils.getSessionId(person.id)
     let canSee = false

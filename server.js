@@ -43,61 +43,61 @@ console.log(`server.js exists in this directory: ${rootDir}`.help)
  * the port, host, environment and if we want to skip any build steps
  */
 const argOptionDefinitions = [{
-    name: 'key',
-    alias: 'k',
-    default: true,
-    type: String
-  },
-  {
-    name: 'port',
-    alias: 'p',
-    type: Number
-  },
-  {
-    name: 'host',
-    alias: 't',
-    type: String
-  },
-  {
-    name: 'env',
-    alias: 'e',
-    type: String
-  },
-  {
-    name: 'elastic',
-    alias: 'l',
-    type: String
-  },
-  {
-    name: 'callback',
-    alias: 'c',
-    type: String
-  },
-  {
-    name: 'skipBuild',
-    alias: 's',
-    type: Boolean
-  },
-  {
-    name: 'buildOnly',
-    alias: 'b',
-    type: Boolean
-  },
-  {
-    name: 'skipOpen',
-    alias: 'o',
-    type: Boolean
-  },
-  {
-    name: 'redirecthttps',
-    alias: 'r',
-    type: Boolean
-  },
-  {
-    name: 'help',
-    alias: 'h',
-    type: String
-  }
+  name: 'key',
+  alias: 'k',
+  default: true,
+  type: String
+},
+{
+  name: 'port',
+  alias: 'p',
+  type: Number
+},
+{
+  name: 'host',
+  alias: 't',
+  type: String
+},
+{
+  name: 'env',
+  alias: 'e',
+  type: String
+},
+{
+  name: 'elastic',
+  alias: 'l',
+  type: String
+},
+{
+  name: 'callback',
+  alias: 'c',
+  type: String
+},
+{
+  name: 'skipBuild',
+  alias: 's',
+  type: Boolean
+},
+{
+  name: 'buildOnly',
+  alias: 'b',
+  type: Boolean
+},
+{
+  name: 'skipOpen',
+  alias: 'o',
+  type: Boolean
+},
+{
+  name: 'redirecthttps',
+  alias: 'r',
+  type: Boolean
+},
+{
+  name: 'help',
+  alias: 'h',
+  type: String
+}
 ]
 
 /*
@@ -344,7 +344,7 @@ if (process.env.NODE_ENV === 'development') {
 
 const elasticsearch = require('elasticsearch')
 
-async function getConfig() {
+async function getConfig () {
   //  This is putting all the config into the global config object
   const esclient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH
@@ -391,6 +391,7 @@ p.then(res => {
   const Config = require('./app/classes/config')
   const sessionstore = require('sessionstore')
   const passport = require('passport')
+  const utils = require('./app/modules/utils')
 
   const config = new Config()
 
@@ -441,11 +442,11 @@ p.then(res => {
     let AUTH0_CALLBACK_URL = auth0.AUTH0_CALLBACK_URL_API
     if (process.env.CALLBACK_URL) AUTH0_CALLBACK_URL = process.env.CALLBACK_URL
     const strategy = new Auth0Strategy({
-        domain: auth0.AUTH0_DOMAIN,
-        clientID: auth0.AUTH0_CLIENT_ID,
-        clientSecret: auth0.AUTH0_SECRET,
-        callbackURL: AUTH0_CALLBACK_URL
-      },
+      domain: auth0.AUTH0_DOMAIN,
+      clientID: auth0.AUTH0_CLIENT_ID,
+      clientSecret: auth0.AUTH0_SECRET,
+      callbackURL: AUTH0_CALLBACK_URL
+    },
       (accessToken, refreshToken, extraParams, profile, done) => {
         return done(null, profile)
       }
@@ -569,6 +570,8 @@ p.then(res => {
     console.log(`    The process id for the server is ${process.pid}, use`.info)
     console.log(`                 'kill -9 ${process.pid}'`.bold)
     console.log('         should you wish to force stop it'.info)
+    console.log(`Admin sessionId: ${utils.getSessionId(process.env.SIGNEDID)}`.info)
+
     console.log('')
     console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
     console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-'.rainbow)
