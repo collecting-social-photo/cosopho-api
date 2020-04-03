@@ -504,7 +504,7 @@ const createPerson = async (args, context, levelDown = 2, initialCall = false) =
   //  We can only create a user if we are signed in with the main site session
   if (context.signed === null) return null
   if (!process.env.SIGNEDID) return null
-  if (context.signed !== utils.getSessionId(process.end.SIGNEDID)) return null
+  if (context.signed !== utils.getSessionId(process.env.SIGNEDID)) return null
 
   //  Check the instance exists
   const checkInstance = await instances.checkInstance({
