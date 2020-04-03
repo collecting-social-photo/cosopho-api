@@ -547,6 +547,7 @@ const createPerson = async (args, context, levelDown = 2, initialCall = false) =
 
   //  Make sure the index exists
   creatIndex()
+  if (args.raw === null || args.raw === '') args.raw = {}
 
   const esclient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH
