@@ -100,6 +100,11 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     if (checkUser && checkUser.id) uniquePersonId = checkUser.id
   }
 
+  // Get the list of instances
+  let allInstances = null
+  if (args.instance) allInstances = args.instance
+  if (args.instances && Array.isArray(args.instances)) allInstances = args.instances
+
   //  These are things we must find
   let must = []
   let mustNot = []
@@ -153,15 +158,7 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     })
   }
 
-  if ('instance' in args && args.instance !== '') {
-    must.push({
-      match: {
-        'instance': args.instance
-      }
-    })
-  }
-
-  if ('instances' in args && Array.isArray(args.instances)) {
+  if (allInstances) {
     must.push({
       terms: {
         'instance.keyword': args.instances
@@ -326,6 +323,7 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
       if (q.match && q.match.ownerDeleted) return false
       if (q.match && q.match.deleted) return false
       if (q.match && q.match.archived) return false
+      if (q.terms && q.terms['initiative.keyword']) return false
       return true
     })
     mustNot = mustNot.filter((q) => {
@@ -361,6 +359,39 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
         'archived': true
       }
     })
+
+    //  Now we have to get all the initiatives, so we can force the
+    //  valid ones
+    const validInitiatives = []
+    const checkInstances = JSON.parse(JSON.stringify(allInstances))
+    while (checkInstances.length > 0) {
+      const thisInstance = checkInstances.pop()
+      const newArgs = {
+        instance: thisInstance,
+        isActive: true
+      }
+      const theseInitiatives = await initiatives.getInitiatives(newArgs, context, ++levelDown)
+      if (theseInitiatives) {
+        theseInitiatives.forEach((i) => {
+          if (!validInitiatives.includes(i.slug)) validInitiatives.push(i.slug)
+        })
+      }
+    }
+
+    //  If we didn't get passed any initiatives to check, then we'll
+    //  keep 'em all, otherwise we need to filter them
+    if (!args.initiatives) {
+      args.initiatives = validInitiatives
+    } else {
+      args.initiatives = args.initiatives.filter((i) => validInitiatives.includes(i))
+    }
+    if (args.initiatives && args.initiatives.length > 0) {
+      must.push({
+        terms: {
+          'initiative.keyword': args.initiatives
+        }
+      })
+    }
   }
 
   //  If we are signed in, and either the admin user, or the owner
@@ -416,6 +447,7 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     if (mustNot.length) body.query.bool.must_not = mustNot
   }
 
+  // console.log(JSON.stringify(body, null, 4))
   let results = null
   try {
     results = await esclient.search({
