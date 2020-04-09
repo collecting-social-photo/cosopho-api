@@ -162,7 +162,7 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   if (allInstances) {
     must.push({
       terms: {
-        'instance.keyword': args.instances
+        'instance.keyword': allInstances
       }
     })
   }
