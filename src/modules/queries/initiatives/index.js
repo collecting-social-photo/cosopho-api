@@ -51,7 +51,9 @@ const getInitiatives = async (args, context, levelDown = 2, initialCall = false)
   }
 
   //  These are things we must find
-  const must = []
+  let must = []
+  let mustNot = []
+
   must.push({
     match: {
       'instance.keyword': args.instance
@@ -78,30 +80,110 @@ const getInitiatives = async (args, context, levelDown = 2, initialCall = false)
 
   //  If we filtering by active
   if ('isActive' in args) {
-    must.push({
-      match: {
-        'isActive': args.isActive
-      }
-    })
+    if (args.isActive === true) {
+      must.push({
+        match: {
+          'isActive': true
+        }
+      })
+    } else {
+      mustNot.push({
+        match: {
+          'isActive': true
+        }
+      })
+    }
   }
 
   //  If we filtering by featured
   if ('isFeatured' in args) {
+    if (args.isFeatured === true) {
+      must.push({
+        match: {
+          'isFeatured': true
+        }
+      })
+    } else {
+      mustNot.push({
+        match: {
+          'isFeatured': true
+        }
+      })
+    }
+  }
+
+  /*
+    Are we allowed to active initiatives?
+    We are allowed to see them if...
+
+    1.  The call is signed and is signed with an id
+        that matches the signedId
+  */
+  if (context.signed && process.env.SIGNEDID && context.signed === utils.getSessionId(process.env.SIGNEDID)) {
+    //  We have a signature from the calling user
+    //  We have signedId in the ENV
+    //  The signature version of the signedId matches the calling user
+    //  So everything is fine
+  } else {
+    //  Otherwise, we are NOT allowed to see this user
+    //  Step 1. Remove any approved, ownerDeleted, deleted, suspended calls we already have in the must and mustnot
+    //  query
+    must = must.filter((q) => {
+      if (q.match && q.match.isActive) return false
+      return true
+    })
+    mustNot = mustNot.filter((q) => {
+      if (q.match && q.match.isActive) return false
+      return true
+    })
+
+    //  Now we need to work out if we are getting photos for a single
+    //  user, if we are, then see if that user is the logged in user
+    //  if so then we can allow archived photos
+
+    //  Now add that filter back in
     must.push({
       match: {
-        'isFeatured': args.isFeatured
+        'isActive': true
       }
     })
   }
 
-  //  If we have something with *must* do, then we add that
-  //  to the search
-  if (must.length > 0) {
-    body.query = {
-      bool: {
-        must
+  //  If we are signed in, and either the admin user, or the owner
+  //  and we are making a single user call, then we can respect the
+  //  isActive flag if we have one
+  if (context.signed) {
+    if ((process.env.SIGNEDID && context.signed === utils.getSessionId(process.env.SIGNEDID))) {
+      //  Remove any active filter already have
+      must = must.filter((q) => !(q.match && q.match.isActive))
+      mustNot = mustNot.filter((q) => !(q.match && q.match.isActive))
+
+      if ('isActive' in args) {
+        if (args.isActive === true) {
+          must.push({
+            match: {
+              'isActive': true
+            }
+          })
+        } else {
+          mustNot.push({
+            match: {
+              'isActive': true
+            }
+          })
+        }
       }
     }
+  }
+
+  //  If we have something with *must* do, then we add that
+  //  to the search
+  if (must.length > 0 || mustNot.length > 0) {
+    body.query = {
+      bool: {}
+    }
+    if (must.length) body.query.bool.must = must
+    if (mustNot.length) body.query.bool.must_not = mustNot
   }
 
   let results = await esclient.search({
