@@ -104,6 +104,7 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   let allInstances = null
   if (args.instance) allInstances = args.instance
   if (args.instances && Array.isArray(args.instances)) allInstances = args.instances
+  if (!Array.isArray(allInstances)) allInstances = [allInstances]
 
   //  These are things we must find
   let must = []
