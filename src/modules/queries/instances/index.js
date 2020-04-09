@@ -88,7 +88,7 @@ const getInstances = async (args, context, levelDown = 2, initialCall = false) =
     for (const instance of instances) {
       const initiatives = await queryInitiatives.getInitiatives({
         instance: instance.id
-      })
+      }, context)
       instance.initiatives = initiatives
     }
   }
