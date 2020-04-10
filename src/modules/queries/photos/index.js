@@ -371,7 +371,7 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
         instance: thisInstance,
         isActive: true
       }
-      const theseInitiatives = await initiatives.getInitiatives(newArgs, context, ++levelDown)
+      const theseInitiatives = await initiatives.getInitiatives(newArgs, context, (levelDown + 1))
       if (theseInitiatives) {
         theseInitiatives.forEach((i) => {
           if (!validInitiatives.includes(i.slug)) validInitiatives.push(i.slug)
