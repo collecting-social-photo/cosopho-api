@@ -284,8 +284,9 @@ exports.getInitiative = getInitiative
 const checkInitiative = async (args, context) => {
   context.checkOnly = true
   const initiative = await getInitiatives(args, context)
-  if (initiative) return true
-  return false
+  if (!initiative) return false
+  if (Array.isArray(initiative) && initiative.length === 0) return false
+  return true
 }
 exports.checkInitiative = checkInitiative
 /*
@@ -302,13 +303,22 @@ const createInitiative = async (args, context, levelDown = 2, initialCall = fals
   if (!args.instance) return null
 
   //  Convert the title into a slug
-  const slug = utils.slugify(args.title)
+  let slug = utils.slugify(args.title)
   const slugTail = crypto
     .createHash('md5')
     .update(`${Math.random()}`)
     .digest('hex')
     .substring(0, 16)
   const id = `${slug.substring(0, 12)}-${slugTail}`
+
+  //  Check to see if an initiative already exists with this slug
+  const newArgs = {
+    instance: args.instance,
+    slug
+  }
+  const alreadyExists = await checkInitiative(newArgs, context)
+  if (alreadyExists === true) slug = id
+
   //  Make sure the index exists
   creatIndex()
 
