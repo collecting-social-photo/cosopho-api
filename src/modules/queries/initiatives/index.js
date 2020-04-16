@@ -2,7 +2,6 @@ const elasticsearch = require('elasticsearch')
 const common = require('../common.js')
 const utils = require('../../utils')
 const crypto = require('crypto')
-const delay = require('delay')
 
 /*
  *
@@ -334,13 +333,12 @@ const createInitiative = async (args, context, levelDown = 2, initialCall = fals
     index,
     type,
     id,
+    refresh: true,
     body: {
       doc: newInitiative,
       doc_as_upsert: true
     }
   })
-
-  await delay(2000)
 
   //  Return back the values
   const newUpdatedInitiative = await getInitiative({
@@ -386,13 +384,12 @@ const updateInitiative = async (args, context, levelDown = 2, initialCall = fals
     index,
     type,
     id: args.id,
+    refresh: true,
     body: {
       doc: updatedInitiative,
       doc_as_upsert: true
     }
   })
-
-  await delay(2000)
 
   //  Return back the values
   const newUpdatedInitiative = await getInitiative({

@@ -2,7 +2,6 @@ const elasticsearch = require('elasticsearch')
 const common = require('../common.js')
 const utils = require('../../../modules/utils')
 const crypto = require('crypto')
-const delay = require('delay')
 
 /*
  *
@@ -411,6 +410,7 @@ const updatePerson = async (args, context, levelDown = 2, initialCall = false) =
     index,
     type,
     id: args.id,
+    refresh: true,
     body: {
       doc: updatedPerson,
       doc_as_upsert: true
@@ -468,11 +468,10 @@ const updatePerson = async (args, context, levelDown = 2, initialCall = false) =
     await esclient.updateByQuery({
       index: `photos_${process.env.KEY}`,
       type: 'photo',
+      refresh: true,
       body: updateBody
     })
   }
-
-  await delay(2000)
 
   //  Return back the values
   const newUpdatedPerson = await getPerson({
@@ -569,13 +568,12 @@ const createPerson = async (args, context, levelDown = 2, initialCall = false) =
     index,
     type,
     id: args.id,
+    refresh: true,
     body: {
       doc: newPerson,
       doc_as_upsert: true
     }
   })
-
-  await delay(2000)
 
   //  Return back the values
   const newUpdatedPerson = await getPerson({

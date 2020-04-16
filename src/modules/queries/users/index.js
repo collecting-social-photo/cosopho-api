@@ -1,6 +1,5 @@
 const elasticsearch = require('elasticsearch')
 const common = require('../common.js')
-const delay = require('delay')
 /*
  *
  * Make sure the actual index exists
@@ -207,13 +206,12 @@ const updateUser = async (args, context, levelDown = 2, initialCall = false) => 
     index,
     type,
     id: args.id,
+    refresh: true,
     body: {
       doc: updatedUser,
       doc_as_upsert: true
     }
   })
-
-  await delay(2000)
 
   //  Return back the values
   const newUpdatedUser = await getUser({

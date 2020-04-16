@@ -630,6 +630,7 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
     index,
     type,
     id: newId,
+    refresh: true,
     body: {
       doc: newPhoto,
       doc_as_upsert: true

@@ -2,7 +2,6 @@ const elasticsearch = require('elasticsearch')
 const common = require('../common.js')
 const utils = require('../../../modules/utils')
 const crypto = require('crypto')
-const delay = require('delay')
 const request = require('request')
 
 /*
@@ -195,13 +194,12 @@ const createInstance = async (args, context, levelDown = 2, initialCall = false)
     index,
     type,
     id,
+    refresh: true,
     body: {
       doc: newInstance,
       doc_as_upsert: true
     }
   })
-
-  await delay(2000)
 
   //  Return back the values
   const newUpdatedInstance = await getInstance({
@@ -244,12 +242,12 @@ const updateInstance = async (args, context, levelDown = 2, initialCall = false)
     index,
     type,
     id: args.id,
+    refresh: true,
     body: {
       doc: updatedInstance,
       doc_as_upsert: true
     }
   })
-  await delay(2000)
 
   //  Return back the values
   const newUpdatedInstance = await getInstance({
