@@ -517,7 +517,8 @@ const createPerson = async (args, context, levelDown = 2, initialCall = false) =
     instance: args.instance
   }, context) === true) return null
 
-  const rootSlug = utils.slugify(args.username)
+  let slugThisUsername = args.username.split('@')[0]
+  const rootSlug = utils.slugify(slugThisUsername)
 
   //  Check to see if the username already exists
   let makeExtraSlug = false
