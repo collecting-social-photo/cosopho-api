@@ -324,7 +324,6 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
       if (q.match && q.match.ownerDeleted) return false
       if (q.match && q.match.deleted) return false
       if (q.match && q.match.archived) return false
-      if (q.terms && q.terms['initiative.keyword']) return false
       return true
     })
     mustNot = mustNot.filter((q) => {
@@ -359,6 +358,15 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
       match: {
         'archived': true
       }
+    })
+  }
+
+  //  If we are using a GOD sig, and passing in the excludeInactive filter then we need to filter the
+  //  initiatives
+  if (!(context.signed && process.env.SIGNEDID && context.signed === utils.getSessionId(process.env.SIGNEDID)) || ('excludeInactive' in args && args.excludeInactive === true)) {
+    must = must.filter((q) => {
+      if (q.terms && q.terms['initiative.keyword']) return false
+      return true
     })
 
     //  Now we have to get all the initiatives, so we can force the

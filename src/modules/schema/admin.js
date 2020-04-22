@@ -173,6 +173,7 @@ type Query {
     reviewed: Boolean
     approved: Boolean
     homepage: Boolean
+    excludeInactive: Boolean
     suspended: Boolean
     ownerDeleted: Boolean
     archived: Boolean
