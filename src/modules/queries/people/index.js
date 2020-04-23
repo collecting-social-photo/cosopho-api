@@ -378,6 +378,7 @@ const updatePerson = async (args, context, levelDown = 2, initialCall = false) =
   //  These are the fields that can be updated
   let keys = [
     'email',
+    'slug',
     'dateOfBirth',
     'placeOfBirth',
     'avatar',
@@ -396,6 +397,7 @@ const updatePerson = async (args, context, levelDown = 2, initialCall = false) =
   if (canEdit === true && isAdminUser === false) {
     delete args.suspended
     delete args.deleted
+    delete args.slug
   }
 
   //  Check to see if we have a new value, if so add it to the update record obj
@@ -460,6 +462,28 @@ const updatePerson = async (args, context, levelDown = 2, initialCall = false) =
       },
       'script': {
         'inline': `ctx._source.ownerDeleted = ${args.deleted}`
+      }
+    }
+  }
+
+  //  If we are updating the slug and it's different to the old slug
+  if ('slug' in args && args.slug.trim() !== '' && args.slug !== preUpdatedPerson.slug) {
+    updateBody = {
+      'query': {
+        'bool': {
+          'must': [{
+            'match': {
+              'personSlug': preUpdatedPerson.slug
+            }
+          }, {
+            'match': {
+              'instance': args.instance
+            }
+          }]
+        }
+      },
+      'script': {
+        'inline': `ctx._source.personSlug = "${args.slug}"`
       }
     }
   }
