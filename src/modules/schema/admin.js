@@ -265,6 +265,7 @@ type Mutation {
     id: String!
     instance: String!
     username: String
+    slug: String
     email: String
     dateOfBirth: String
     placeOfBirth: String
