@@ -312,6 +312,7 @@ type Mutation {
   updatePhoto(
     id: String!
     instance: String!
+    personSlug: String
     title: String
     story: String
     tags: [String]

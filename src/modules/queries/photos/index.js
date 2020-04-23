@@ -565,26 +565,17 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
   }, context)
   if (!checkPerson) return null
 
-  //  Grab the id of the user we are about to try and get
-  let uniquePersonId = null
-  const contextCopy = JSON.parse(JSON.stringify(context))
-  contextCopy.signed = utils.getSessionId(process.env.SIGNEDID) // Sign the next call with the admin API token
-  //  Grab the user of this slug
-  const checkId = await people.getPersonId({
-    slug: args.personSlug
-  }, contextCopy)
-  //  record the id of the user we are about to create a photo for
-  if (checkId && checkId.id) uniquePersonId = checkId.id
-
-  //  If the uniquePersonId is different from the signed in
-  //  user's then we can't create this photo
-  let canCreate = false
-  //  If the signature is the same as the user we are attempting to create a photo for
-  if (context.signed === utils.getSessionId(uniquePersonId)) canCreate = true
-  //  If we are signed in as the main site...
-  if (context.signed && process.env.SIGNEDID && context.signed === utils.getSessionId(process.env.SIGNEDID)) canCreate = true
-  //  If either of the above isn't true, then we can't create a photo as this user
-  if (!canCreate) return null
+  //  Make sure we can edit this photo if we are the user who
+  //  owns it, or an admin user
+  let canEdit = false
+  let isAdminUser = false
+  if (context.signed === utils.getSessionId(args.id)) canEdit = true
+  if (process.env.SIGNEDID && context.signed === utils.getSessionId(process.env.SIGNEDID)) {
+    canEdit = true
+    isAdminUser = true
+  }
+  //  If we can't edit, or we're not an admin user then reject this
+  if (canEdit === false && isAdminUser === false) return null
 
   const newId = crypto
     .createHash('sha512')
@@ -680,26 +671,17 @@ const updatePhoto = async (args, context, levelDown = 2, initialCall = false) =>
   //  Make sure the index exists
   creatIndex()
 
-  //  Grab the id of the user we are about to try and get
-  let uniquePersonId = null
-  const contextCopy = JSON.parse(JSON.stringify(context))
-  contextCopy.signed = utils.getSessionId(process.env.SIGNEDID) // Sign the next call with the admin API token
-  //  Grab the user of this slug
-  const checkId = await people.getPersonId({
-    slug: checkPhoto.personSlug
-  }, contextCopy)
-  //  record the id of the user we are about to create a photo for
-  if (checkId && checkId.id) uniquePersonId = checkId.id
-
-  //  If the uniquePersonId is different from the signed in
-  //  user's then we can't create this photo
-  let canCreate = false
-  //  If the signature is the same as the user we are attempting to create a photo for
-  if (context.signed === utils.getSessionId(uniquePersonId)) canCreate = true
-  //  If we are signed in as the main site...
-  if (context.signed && process.env.SIGNEDID && context.signed === utils.getSessionId(process.env.SIGNEDID)) canCreate = true
-  //  If either of the above isn't true, then we can't create a photo as this user
-  if (!canCreate) return null
+  //  Make sure we can edit this photo if we are the user who
+  //  owns it, or an admin user
+  let canEdit = false
+  let isAdminUser = false
+  if (context.signed === utils.getSessionId(args.id)) canEdit = true
+  if (process.env.SIGNEDID && context.signed === utils.getSessionId(process.env.SIGNEDID)) {
+    canEdit = true
+    isAdminUser = true
+  }
+  //  If we can't edit, or we're not an admin user then reject this
+  if (canEdit === false && isAdminUser === false) return null
 
   const esclient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH
@@ -729,8 +711,13 @@ const updatePhoto = async (args, context, levelDown = 2, initialCall = false) =>
     'approved',
     'homepage',
     'notes',
-    'archived'
+    'archived',
+    'personSlug'
   ]
+  //  Limit those records if we are the user but not the admin user
+  if (canEdit === true && isAdminUser === false) {
+    delete args.personSlug
+  }
 
   //  Check to see if we have a new value, if so add it to the update record obj
   keys.forEach((key) => {
