@@ -199,6 +199,8 @@ const getPeople = async (args, context, levelDown = 2, initialCall = false) => {
     const newArgs = {
       peopleSlugs: peopleSlugs
     }
+    if (args.instance) newArgs.instance = args.instance
+    if (args.instances) newArgs.instances = args.instances
 
     //  Grab any 'photo' filters we want to pass through
     Object.entries(args).forEach((keyValue) => {
