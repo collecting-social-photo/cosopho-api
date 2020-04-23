@@ -86,7 +86,7 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     if (args.peopleSlugs) {
       if (Array.isArray(args.peopleSlugs) && args.peopleSlugs.length === 1) uniquePersonSlug = args.peopleSlugs[0]
       if (!Array.isArray(args.peopleSlugs)) uniquePersonSlug = args.peopleSlugs
-      if (uniquePersonSlug & uniquePersonSlug.trim() === '') uniquePersonSlug = null
+      if (uniquePersonSlug && uniquePersonSlug.trim() === '') uniquePersonSlug = null
     }
   }
   //  If we have uniquePersonSlug see if we can get the ids
@@ -559,7 +559,7 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
   if (!checkInitiative) return null
 
   //  Check the user exists
-  const checkPerson = await people.checkPerson({
+  const checkPerson = await people.getPerson({
     slug: args.personSlug,
     instance: args.instance
   }, context)
@@ -569,7 +569,7 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
   //  owns it, or an admin user
   let canEdit = false
   let isAdminUser = false
-  if (context.signed === utils.getSessionId(args.id)) canEdit = true
+  if (context.signed === utils.getSessionId(checkPerson.id)) canEdit = true
   if (process.env.SIGNEDID && context.signed === utils.getSessionId(process.env.SIGNEDID)) {
     canEdit = true
     isAdminUser = true
