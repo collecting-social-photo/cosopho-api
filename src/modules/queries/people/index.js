@@ -5,36 +5,13 @@ const crypto = require('crypto')
 
 /*
  *
- * Make sure the actual index exists
- *
- */
-const creatIndex = async () => {
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
-  const index = `people_${process.env.KEY}`
-  const exists = await esclient.indices.exists({
-    index
-  })
-  if (exists === false) {
-    await esclient.indices.create({
-      index
-    })
-  }
-}
-
-/*
- *
  * This gets all the people
  *
  */
 const getPeople = async (args, context, levelDown = 2, initialCall = false) => {
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('people')
 
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
   const index = `people_${process.env.KEY}`
 
   let page = common.getPage(args)
@@ -180,10 +157,7 @@ const getPeople = async (args, context, levelDown = 2, initialCall = false) => {
     if (mustNot.length) body.query.bool.must_not = mustNot
   }
 
-  let results = await esclient.search({
-    index,
-    body
-  })
+  let results = await common.runSearch(index, body)
 
   let total = null
   if (results.hits.total) total = results.hits.total
@@ -359,7 +333,7 @@ const updatePerson = async (args, context, levelDown = 2, initialCall = false) =
   if (!checkInstance) return null
 
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('people')
 
   const esclient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH
@@ -409,17 +383,7 @@ const updatePerson = async (args, context, levelDown = 2, initialCall = false) =
     }
   })
 
-  //  Update the thing
-  await esclient.update({
-    index,
-    type,
-    id: args.id,
-    refresh: true,
-    body: {
-      doc: updatedPerson,
-      doc_as_upsert: true
-    }
-  })
+  await common.runUpdate(index, type, args.id, updatedPerson)
 
   //  If we are suspending a user then we need to also suspend all the photos
   //  connected to that user
@@ -491,12 +455,16 @@ const updatePerson = async (args, context, levelDown = 2, initialCall = false) =
   }
 
   if (updateBody !== null) {
-    await esclient.updateByQuery({
-      index: `photos_${process.env.KEY}`,
-      type: 'photo',
-      refresh: true,
-      body: updateBody
-    })
+    try {
+      await esclient.updateByQuery({
+        index: `photos_${process.env.KEY}`,
+        type: 'photo',
+        refresh: true,
+        body: updateBody
+      })
+    } catch (er) {
+      common.throwError('503 Service Unavailable')
+    }
   }
 
   //  Return back the values
@@ -572,12 +540,9 @@ const createPerson = async (args, context, levelDown = 2, initialCall = false) =
   const slug = `${rootSlug.substring(0, 35)}-${extraSlug}`
 
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('people')
   if (args.raw === null || args.raw === '') args.raw = '{}'
 
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
   const index = `people_${process.env.KEY}`
   const type = 'person'
   const d = new Date()
@@ -591,16 +556,7 @@ const createPerson = async (args, context, levelDown = 2, initialCall = false) =
     created: d
   }
 
-  await esclient.update({
-    index,
-    type,
-    id: args.id,
-    refresh: true,
-    body: {
-      doc: newPerson,
-      doc_as_upsert: true
-    }
-  })
+  await common.runUpdate(index, type, args.id, newPerson)
 
   //  Return back the values
   const newUpdatedPerson = await getPerson({
@@ -628,7 +584,7 @@ const loginPerson = async (args, context, levelDown = 2, initialCall = false) =>
     .digest('base64')
 
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('people')
 
   const page = 0
   const perPage = 200
@@ -662,14 +618,9 @@ const loginPerson = async (args, context, levelDown = 2, initialCall = false) =>
       must
     }
   }
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
   const index = `people_${process.env.KEY}`
-  let results = await esclient.search({
-    index,
-    body
-  })
+  let results = await common.runSearch(index, body)
+
   if (results.hits && results.hits.hits && results.hits.hits.length === 1) {
     return {
       status: 'ok',

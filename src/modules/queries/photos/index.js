@@ -7,36 +7,13 @@ const crypto = require('crypto')
 
 /*
  *
- * Make sure the actual index exists
- *
- */
-const creatIndex = async () => {
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
-  const index = `photos_${process.env.KEY}`
-  const exists = await esclient.indices.exists({
-    index
-  })
-  if (exists === false) {
-    await esclient.indices.create({
-      index
-    })
-  }
-}
-
-/*
- *
  * This gets all the photos
  *
  */
 const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   //  Make sure the index exists
-  await creatIndex()
+  await common.createIndex('photos')
 
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
   const index = `photos_${process.env.KEY}`
 
   let page = common.getPage(args)
@@ -457,13 +434,7 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   }
 
   // console.log(JSON.stringify(body, null, 4))
-  let results = null
-  try {
-    results = await esclient.search({
-      index,
-      body
-    })
-  } catch (er) {}
+  let results = await common.runSearch(index, body)
 
   let total = null
   if (!results || !results.hits || !results.hits.hits) {
@@ -584,7 +555,7 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
     .slice(0, 36)
 
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('photos')
 
   //  Default photo
   const newPhoto = {
@@ -620,21 +591,9 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
   if (args.notes) newPhoto.notes = args.notes
 
   //  Do some EXIF stuff here if we can
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
   const index = `photos_${process.env.KEY}`
   const type = 'photo'
-  await esclient.update({
-    index,
-    type,
-    id: newId,
-    refresh: true,
-    body: {
-      doc: newPhoto,
-      doc_as_upsert: true
-    }
-  })
+  await common.runUpdate(index, type, newId, newPhoto)
 
   return newPhoto
 }
@@ -669,7 +628,7 @@ const updatePhoto = async (args, context, levelDown = 2, initialCall = false) =>
   if (!checkPhoto || !checkPhoto.personSlug) return null
 
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('photos')
 
   //  Make sure we can edit this photo if we are the user who
   //  owns it, or an admin user
@@ -683,9 +642,6 @@ const updatePhoto = async (args, context, levelDown = 2, initialCall = false) =>
   //  If we can't edit, or we're not an admin user then reject this
   if (canEdit === false && isAdminUser === false) return null
 
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
   const index = `photos_${process.env.KEY}`
   const type = 'photo'
   const updatedPhoto = {
@@ -728,16 +684,7 @@ const updatePhoto = async (args, context, levelDown = 2, initialCall = false) =>
   })
 
   //  Update the thing
-  await esclient.update({
-    index,
-    type,
-    id: args.id,
-    refresh: true,
-    body: {
-      doc: updatedPhoto,
-      doc_as_upsert: true
-    }
-  })
+  await common.runUpdate(index, type, args.id, updatedPhoto)
 
   //  Return back the values
   const newUpdatedPhoto = await getPhoto({
@@ -771,7 +718,7 @@ const deletePhoto = async (args, context, levelDown = 2, initialCall = false) =>
   if (!checkInstance) return null
 
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('photos')
 
   const checkPhoto = await getPhoto({
     id: args.id,

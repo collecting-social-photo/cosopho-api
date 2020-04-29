@@ -6,36 +6,13 @@ const request = require('request')
 
 /*
  *
- * Make sure the actual index exists
- *
- */
-const creatIndex = async () => {
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
-  const index = `instances_${process.env.KEY}`
-  const exists = await esclient.indices.exists({
-    index
-  })
-  if (exists === false) {
-    await esclient.indices.create({
-      index
-    })
-  }
-}
-
-/*
- *
  * This gets all the instances
  *
  */
 const getInstances = async (args, context, levelDown = 2, initialCall = false) => {
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('instances')
 
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
   const index = `instances_${process.env.KEY}`
 
   let page = common.getPage(args)
@@ -69,10 +46,7 @@ const getInstances = async (args, context, levelDown = 2, initialCall = false) =
     }
   }
 
-  let results = await esclient.search({
-    index,
-    body
-  })
+  let results = await common.runSearch(index, body)
 
   let total = null
   if (results.hits.total) total = results.hits.total
@@ -169,11 +143,8 @@ const createInstance = async (args, context, levelDown = 2, initialCall = false)
   const id = `${slug}-${slugTail}`
 
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('instances')
 
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
   const index = `instances_${process.env.KEY}`
   const type = 'instance'
   const d = new Date()
@@ -190,16 +161,7 @@ const createInstance = async (args, context, levelDown = 2, initialCall = false)
   if (args.defaultLanguage) newInstance.defaultLanguage = args.defaultLanguage
   if (args.userFields) newInstance.userFields = JSON.parse(args.userFields)
 
-  await esclient.update({
-    index,
-    type,
-    id,
-    refresh: true,
-    body: {
-      doc: newInstance,
-      doc_as_upsert: true
-    }
-  })
+  await common.runUpdate(index, type, id, newInstance)
 
   //  Return back the values
   const newUpdatedInstance = await getInstance({
@@ -221,11 +183,8 @@ const updateInstance = async (args, context, levelDown = 2, initialCall = false)
   if (!args.id) return null
 
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('instances')
 
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
   const index = `instances_${process.env.KEY}`
   const type = 'instance'
   const updatedInstance = {
@@ -238,16 +197,7 @@ const updateInstance = async (args, context, levelDown = 2, initialCall = false)
   if (args.defaultLanguage) updatedInstance.defaultLanguage = args.defaultLanguage
   if (args.userFields) updatedInstance.userFields = JSON.parse(args.userFields)
 
-  await esclient.update({
-    index,
-    type,
-    id: args.id,
-    refresh: true,
-    body: {
-      doc: updatedInstance,
-      doc_as_upsert: true
-    }
-  })
+  await common.runUpdate(index, type, args.id, updatedInstance)
 
   //  Return back the values
   const newUpdatedInstance = await getInstance({
@@ -297,7 +247,7 @@ const deleteInstance = async (args, context, levelDown = 2, initialCall = false)
   //  Now we know there are no initiatives connected we can delete the instance
 
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('instances')
 
   const esclient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH
