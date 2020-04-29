@@ -86,7 +86,23 @@ router.use(function (req, res, next) {
   if (req.session && req.session.user === undefined) {
     req.user = null
   } else {
-    req.user = req.session.user
+    try {
+      req.user = req.session.user
+    } catch (er) {
+      //  If we have been trying to make a query call then we can throw
+      //  a graphQL friendly error message here
+      if (req.method === 'POST' && (req.url.includes('playground') || req.url.includes('graphql'))) {
+        const errorMsg = {
+          errors: [{
+            'message': '503 Service Unavailable',
+            'statusCode': 503
+          }],
+          data: null
+        }
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify(errorMsg))
+      }
+    }
   }
 
   //  Read in the language files and overlay the selected langage on the

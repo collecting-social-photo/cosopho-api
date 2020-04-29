@@ -24,3 +24,7 @@ exports.getSessionId = (id) => {
     .toString('hex')
     .slice(0, 32)
 }
+
+exports.throwError = (msg) => {
+  throw new Error(msg)
+}

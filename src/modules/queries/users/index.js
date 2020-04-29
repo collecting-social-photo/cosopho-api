@@ -1,24 +1,4 @@
-const elasticsearch = require('elasticsearch')
 const common = require('../common.js')
-/*
- *
- * Make sure the actual index exists
- *
- */
-const creatIndex = async () => {
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
-  const index = `users_${process.env.KEY}`
-  const exists = await esclient.indices.exists({
-    index
-  })
-  if (exists === false) {
-    await esclient.indices.create({
-      index
-    })
-  }
-}
 
 /*
  *
@@ -27,11 +7,8 @@ const creatIndex = async () => {
  */
 const getUsers = async (args, context, levelDown = 2, initialCall = false) => {
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('users')
 
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
   const index = `users_${process.env.KEY}`
 
   let page = common.getPage(args)
@@ -65,10 +42,7 @@ const getUsers = async (args, context, levelDown = 2, initialCall = false) => {
     }
   }
 
-  let results = await esclient.search({
-    index,
-    body
-  })
+  let results = await common.runSearch(index, body)
 
   let total = null
   if (results.hits.total) total = results.hits.total
@@ -176,10 +150,7 @@ const updateUser = async (args, context, levelDown = 2, initialCall = false) => 
   if (!args.instances && !('isAdmin' in args) && !('isDeveloper' in args)) return null
 
   //  Make sure the index exists
-  creatIndex()
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
+  await common.createIndex('users')
   const index = `users_${process.env.KEY}`
   const type = 'user'
 
@@ -202,16 +173,7 @@ const updateUser = async (args, context, levelDown = 2, initialCall = false) => 
     roles: newRoles
   }
 
-  await esclient.update({
-    index,
-    type,
-    id: args.id,
-    refresh: true,
-    body: {
-      doc: updatedUser,
-      doc_as_upsert: true
-    }
-  })
+  await common.runUpdate(index, type, args.id, updatedUser)
 
   //  Return back the values
   const newUpdatedUser = await getUser({

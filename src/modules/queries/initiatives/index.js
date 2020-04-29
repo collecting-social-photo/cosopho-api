@@ -5,26 +5,6 @@ const crypto = require('crypto')
 
 /*
  *
- * Make sure the actual index exists
- *
- */
-const creatIndex = async () => {
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
-  const index = `initiatives_${process.env.KEY}`
-  const exists = await esclient.indices.exists({
-    index
-  })
-  if (exists === false) {
-    await esclient.indices.create({
-      index
-    })
-  }
-}
-
-/*
- *
  * This gets all the initiative
  *
  */
@@ -33,11 +13,8 @@ const getInitiatives = async (args, context, levelDown = 2, initialCall = false)
   if (!args.instance) return null
 
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('initiatives')
 
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
   const index = `initiatives_${process.env.KEY}`
 
   let page = common.getPage(args)
@@ -185,10 +162,7 @@ const getInitiatives = async (args, context, levelDown = 2, initialCall = false)
     if (mustNot.length) body.query.bool.must_not = mustNot
   }
 
-  let results = await esclient.search({
-    index,
-    body
-  })
+  let results = await common.runSearch(index, body)
 
   let total = null
   if (results.hits.total) total = results.hits.total
@@ -320,11 +294,8 @@ const createInitiative = async (args, context, levelDown = 2, initialCall = fals
   if (alreadyExists === true) slug = id
 
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('initiatives')
 
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
   const index = `initiatives_${process.env.KEY}`
   const type = 'initiative'
   const d = new Date()
@@ -339,16 +310,7 @@ const createInitiative = async (args, context, levelDown = 2, initialCall = fals
     isFeatured: args.isFeatured
   }
 
-  await esclient.update({
-    index,
-    type,
-    id,
-    refresh: true,
-    body: {
-      doc: newInitiative,
-      doc_as_upsert: true
-    }
-  })
+  await common.runUpdate(index, type, id, newInitiative)
 
   //  Return back the values
   const newUpdatedInitiative = await getInitiative({
@@ -375,11 +337,8 @@ const updateInitiative = async (args, context, levelDown = 2, initialCall = fals
   if (!args.title && !('isActive' in args) && !('isFeatured' in args)) return null
 
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('initiatives')
 
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
   const index = `initiatives_${process.env.KEY}`
   const type = 'initiative'
   const updatedInitiative = {
@@ -390,16 +349,7 @@ const updateInitiative = async (args, context, levelDown = 2, initialCall = fals
   if ('isActive' in args) updatedInitiative.isActive = args.isActive
   if ('isFeatured' in args) updatedInitiative.isFeatured = args.isFeatured
 
-  await esclient.update({
-    index,
-    type,
-    id: args.id,
-    refresh: true,
-    body: {
-      doc: updatedInitiative,
-      doc_as_upsert: true
-    }
-  })
+  await common.runUpdate(index, type, args.id, updatedInitiative)
 
   //  Return back the values
   const newUpdatedInitiative = await getInitiative({
@@ -424,7 +374,7 @@ const deleteInitiative = async (args, context, levelDown = 2, initialCall = fals
   if (!args.instance) return null
 
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('initiatives')
 
   const esclient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH

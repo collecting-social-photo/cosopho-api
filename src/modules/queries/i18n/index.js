@@ -43,36 +43,13 @@ const pingCallback = (instance) => {
 
 /*
  *
- * Make sure the actual index exists
- *
- */
-const creatIndex = async () => {
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
-  const index = `i18ns_${process.env.KEY}`
-  const exists = await esclient.indices.exists({
-    index
-  })
-  if (exists === false) {
-    await esclient.indices.create({
-      index
-    })
-  }
-}
-
-/*
- *
  * This gets all the translations
  *
  */
 const getStrings = async (args, context, levelDown = 2, initialCall = false) => {
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('i18ns')
 
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
   const index = `i18ns_${process.env.KEY}`
 
   let page = common.getPage(args)
@@ -230,10 +207,7 @@ const getStrings = async (args, context, levelDown = 2, initialCall = false) => 
     if (must.length) body.query.bool.must = must
   }
 
-  let results = await esclient.search({
-    index,
-    body
-  })
+  let results = await common.runSearch(index, body)
 
   let total = null
   if (results.hits.total) total = results.hits.total
@@ -344,7 +318,7 @@ const createString = async (args, context, levelDown = 2, initialCall = false) =
   const newId = `${instance}.${utils.slugify(args.section)}.${utils.slugify(args.stub)}.${args.language}`
 
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('i18ns')
 
   //  Default photo
   const newString = {
@@ -360,21 +334,9 @@ const createString = async (args, context, levelDown = 2, initialCall = false) =
   }
 
   //  Do some EXIF stuff here if we can
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
   const index = `i18ns_${process.env.KEY}`
   const type = 'string'
-  await esclient.update({
-    index,
-    type,
-    id: newId,
-    refresh: true,
-    body: {
-      doc: newString,
-      doc_as_upsert: true
-    }
-  })
+  await common.runUpdate(index, type, newId, newString)
 
   //  Check to see if we have an endpoint for this instance
   //  If so then we call it
@@ -397,11 +359,8 @@ const updateString = async (args, context, levelDown = 2, initialCall = false) =
   if (!args.id || !args.string || args.string.trim() === '') return null
 
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('i18ns')
 
-  const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
-  })
   const index = `i18ns_${process.env.KEY}`
   const type = 'string'
   const updatedString = {
@@ -410,17 +369,8 @@ const updateString = async (args, context, levelDown = 2, initialCall = false) =
     updated: new Date(),
     updatedBy: context.userId
   }
-  //  Update the thing
-  await esclient.update({
-    index,
-    type,
-    id: args.id,
-    refresh: true,
-    body: {
-      doc: updatedString,
-      doc_as_upsert: true
-    }
-  })
+
+  await common.runUpdate(index, type, args.id, updatedString)
 
   //  Return back the values
   const newUpdatedString = await getString({
@@ -450,7 +400,7 @@ const deleteString = async (args, context, levelDown = 2, initialCall = false) =
   if (!args.id) return null
 
   //  Make sure the index exists
-  creatIndex()
+  await common.createIndex('i18ns')
 
   const esclient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH
@@ -500,11 +450,16 @@ const deleteAllStrings = async (args, context, levelDown = 2, initialCall = fals
   })
   const index = `i18ns_${process.env.KEY}`
   const type = 'string'
-  await esclient.deleteByQuery({
-    index,
-    type,
-    body
-  })
+
+  try {
+    await esclient.deleteByQuery({
+      index,
+      type,
+      body
+    })
+  } catch (er) {
+    utils.throwError('503 Service Unavailable')
+  }
 
   return {
     status: 'ok',
