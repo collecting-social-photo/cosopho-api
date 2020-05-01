@@ -429,7 +429,8 @@ const getUser = async (token) => {
 
   //  If we didn't have it, then we need to look up the user in the database
   const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
+    host: process.env.ELASTICSEARCH,
+    requestTimeout: 30000
   })
   const index = `users_${process.env.KEY}`
   const exists = await esclient.indices.exists({

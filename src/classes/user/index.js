@@ -13,7 +13,8 @@ const elasticsearch = require('elasticsearch')
 const getUserSync = async id => {
   //  Make sure we have the user table in the database
   const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
+    host: process.env.ELASTICSEARCH,
+    requestTimeout: 30000
   })
   const index = `users_${process.env.KEY}`
   const type = 'user'
@@ -104,7 +105,8 @@ const setLang = async (id, lang) => {
 
 const setKeyValue = async (id, key, value) => {
   const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
+    host: process.env.ELASTICSEARCH,
+    requestTimeout: 30000
   })
   const index = `users_${process.env.KEY}`
   const type = 'user'

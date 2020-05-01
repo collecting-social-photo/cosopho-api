@@ -4,7 +4,8 @@ const elasticsearch = require('elasticsearch')
 
 const saveConfig = async () => {
   const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
+    host: process.env.ELASTICSEARCH,
+    requestTimeout: 30000
   })
   const index = `config_${process.env.KEY}`
   const type = 'config'
