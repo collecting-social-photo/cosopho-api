@@ -336,7 +336,8 @@ const updatePerson = async (args, context, levelDown = 2, initialCall = false) =
   await common.createIndex('people')
 
   const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
+    host: process.env.ELASTICSEARCH,
+    requestTimeout: 30000
   })
   const index = `people_${process.env.KEY}`
   const type = 'person'

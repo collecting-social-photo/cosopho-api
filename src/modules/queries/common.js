@@ -7,7 +7,8 @@ exports.throwError = (msg) => {
 
 exports.createIndex = async (thing) => {
   const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
+    host: process.env.ELASTICSEARCH,
+    requestTimeout: 30000
   })
   const index = `${thing}_${process.env.KEY}`
   let exists = false
@@ -27,7 +28,8 @@ exports.createIndex = async (thing) => {
 
 const runSearch = async (index, body) => {
   const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
+    host: process.env.ELASTICSEARCH,
+    requestTimeout: 30000
   })
   let results = null
   try {
@@ -44,7 +46,8 @@ exports.runSearch = runSearch
 
 const runUpdate = async (index, type, id, doc) => {
   const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
+    host: process.env.ELASTICSEARCH,
+    requestTimeout: 30000
   })
   let results = null
   try {

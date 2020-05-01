@@ -403,7 +403,8 @@ const deleteString = async (args, context, levelDown = 2, initialCall = false) =
   await common.createIndex('i18ns')
 
   const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
+    host: process.env.ELASTICSEARCH,
+    requestTimeout: 30000
   })
   const index = `18ns_${process.env.KEY}`
   const type = 'string'
@@ -446,7 +447,8 @@ const deleteAllStrings = async (args, context, levelDown = 2, initialCall = fals
 
   //  Do some EXIF stuff here if we can
   const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
+    host: process.env.ELASTICSEARCH,
+    requestTimeout: 30000
   })
   const index = `i18ns_${process.env.KEY}`
   const type = 'string'

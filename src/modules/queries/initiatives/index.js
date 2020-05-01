@@ -377,7 +377,8 @@ const deleteInitiative = async (args, context, levelDown = 2, initialCall = fals
   await common.createIndex('initiatives')
 
   const esclient = new elasticsearch.Client({
-    host: process.env.ELASTICSEARCH
+    host: process.env.ELASTICSEARCH,
+    requestTimeout: 30000
   })
   const index = `initiatives_${process.env.KEY}`
   const type = 'initiative'
