@@ -511,7 +511,7 @@ const getPhoto = async (args, context, levelDown = 2, initialCall = false) => {
   if (args.id) newArgs.ids = [args.id]
   if (args.instance) newArgs.instance = args.instance
 
-  const photo = await getPhotos(newArgs, context, levelDown, initialCall)
+  const photo = utils.JSONcheck(await getPhotos(newArgs, context, levelDown, initialCall))
   if (photo && photo.length === 1) return photo[0]
 
   return null
@@ -612,7 +612,7 @@ const createPhoto = async (args, context, levelDown = 2, initialCall = false) =>
   const type = 'photo'
   await common.runUpdate(index, type, newId, newPhoto)
 
-  return newPhoto
+  return utils.JSONcheck(newPhoto)
 }
 exports.createPhoto = createPhoto
 
@@ -708,7 +708,7 @@ const updatePhoto = async (args, context, levelDown = 2, initialCall = false) =>
     id: args.id,
     instance: args.instance
   }, context)
-  return newUpdatedPhoto
+  return utils.JSONcheck(newUpdatedPhoto)
 }
 exports.updatePhoto = updatePhoto
 
