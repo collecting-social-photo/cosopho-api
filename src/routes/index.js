@@ -16,6 +16,7 @@ const {
 const schemaPublic = require('../modules/schema/public.js')
 const schemaAdmin = require('../modules/schema/admin.js')
 const queries = require('../modules/queries')
+const utils = require('../modules/utils')
 
 const getDefaultTemplateData = require('../helpers').getDefaultTemplateData
 
@@ -408,10 +409,17 @@ const getGrpObj = (isPlayground, userId, userRoles, token, signed) => {
   //  If they are an admin user, then they get the admin scheme, if they
   //  are a normal user then they get the public schema. This way we
   //  don't leak private/admin data
-  if (userRoles && userRoles.isAdmin && userRoles.isAdmin === true) {
-    grpObj.schema = buildSchema(schemaAdmin.schema)
-  } else {
-    grpObj.schema = buildSchema(schemaPublic.schema)
+  try {
+    if (userRoles && userRoles.isAdmin && userRoles.isAdmin === true) {
+      grpObj.schema = buildSchema(schemaAdmin.schema)
+    } else {
+      grpObj.schema = buildSchema(schemaPublic.schema)
+    }
+  } catch (er) {
+    console.log('---------------------------------------')
+    console.log('Error in getGrpObj')
+    console.log(er)
+    return utils.throwError('503 Service Unavailable')
   }
   return grpObj
 }
@@ -470,33 +478,40 @@ const getUser = async (token) => {
 //  If we are doing a direct query we need to grab the token from
 //  the headers, then call the function
 router.use('/graphql', bodyParser.json(), expressGraphql(async (req) => {
-  let token = null
-  let signed = null
+  try {
+    let token = null
+    let signed = null
 
-  if (req && req.headers && req.headers.authorization) {
-    const tokenSplit = req.headers.authorization.split(' ')
-    if (tokenSplit[1]) token = tokenSplit[1]
-    const secondTokenSplit = token.split('-')
-    if (secondTokenSplit.length === 2) {
-      token = secondTokenSplit[0]
-      signed = secondTokenSplit[1]
-    }
-  }
-
-  //  grab the user from the token
-  let user = await getUser(token)
-
-  //  If the token is the handshake, then we'll mark the user as an admin for
-  //  this call\
-  if (token === process.env.HANDSHAKE) {
-    user = {
-      id: 0,
-      roles: {
-        isAdmin: true
+    if (req && req.headers && req.headers.authorization) {
+      const tokenSplit = req.headers.authorization.split(' ')
+      if (tokenSplit[1]) token = tokenSplit[1]
+      const secondTokenSplit = token.split('-')
+      if (secondTokenSplit.length === 2) {
+        token = secondTokenSplit[0]
+        signed = secondTokenSplit[1]
       }
     }
+
+    //  grab the user from the token
+    let user = utils.JSONcheck(await getUser(token))
+
+    //  If the token is the handshake, then we'll mark the user as an admin for
+    //  this call\
+    if (token === process.env.HANDSHAKE) {
+      user = {
+        id: 0,
+        roles: {
+          isAdmin: true
+        }
+      }
+    }
+    return (getGrpObj(false, user.id, user.roles, token, signed))
+  } catch (er) {
+    console.log('---------------------------------------')
+    console.log('Error in route use /graphql')
+    console.log(er)
+    return utils.throwError('503 Service Unavailable')
   }
-  return (getGrpObj(false, user.id, user.roles, token, signed))
 }))
 
 //  If we are coming from the playground, then we pull the token from the URL
@@ -519,7 +534,7 @@ router.use('/:token/playground', bodyParser.json(), expressGraphql(async (req) =
     }
   }
 
-  let user = await getUser(token)
+  let user = utils.JSONcheck(await getUser(token))
 
   //  If the token is the handshake, then we'll mark the user as an admin for
   //  this call

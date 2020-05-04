@@ -45,7 +45,8 @@ exports.stringify = (json) => {
 
 exports.JSONcheck = (thingToJSON) => {
   try {
-    const newThing = JSON.parse(JSON.stringify(thingToJSON))
+    let newThing = null
+    newThing = JSON.parse(JSON.stringify(thingToJSON))
     return newThing
   } catch (er) {
     console.log('-----------------------------------------')
