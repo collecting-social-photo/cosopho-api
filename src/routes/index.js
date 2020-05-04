@@ -517,53 +517,60 @@ router.use('/graphql', bodyParser.json(), expressGraphql(async (req) => {
 //  If we are coming from the playground, then we pull the token from the URL
 //  then call the function
 router.use('/:token/playground', bodyParser.json(), expressGraphql(async (req) => {
-  //  grab the user from the token
-  let token = null
-  let signed = null
-  if (req.params.token) {
-    const tokenSplit = req.params.token.split(' ')
-    if (tokenSplit[1]) {
-      token = tokenSplit[1]
-    } else {
-      token = tokenSplit[0]
-    }
-    const secondTokenSplit = token.split('-')
-    if (secondTokenSplit.length === 2) {
-      token = secondTokenSplit[0]
-      signed = secondTokenSplit[1]
-    }
-  }
-
-  let user = utils.JSONcheck(await getUser(token))
-
-  //  If the token is the handshake, then we'll mark the user as an admin for
-  //  this call
-  if (token === process.env.HANDSHAKE) {
-    user = {
-      id: 0,
-      roles: {
-        isAdmin: true
+  try {
+    //  grab the user from the token
+    let token = null
+    let signed = null
+    if (req.params.token) {
+      const tokenSplit = req.params.token.split(' ')
+      if (tokenSplit[1]) {
+        token = tokenSplit[1]
+      } else {
+        token = tokenSplit[0]
+      }
+      const secondTokenSplit = token.split('-')
+      if (secondTokenSplit.length === 2) {
+        token = secondTokenSplit[0]
+        signed = secondTokenSplit[1]
       }
     }
-  }
 
-  //  Check to see if the user exists
-  if (user === null) {
-    throw new Error('User not found.')
-  }
-  //  See if the developer token has been revoked
-  //  If there are no roles, or there is a developer role but it's false, then we may
-  //  not have a valid api token
-  if (!user.roles || !('isDeveloper' in user.roles) || user.roles.isDeveloper === false) {
-    //  But them being an admin user overrides that, so we check to see if they aren't
-    if (!('isAdmin' in user.roles) || user.roles.isAdmin === false) {
-      throw new Error('Your API token is not valid')
+    let user = utils.JSONcheck(await getUser(token))
+
+    //  If the token is the handshake, then we'll mark the user as an admin for
+    //  this call
+    if (token === process.env.HANDSHAKE) {
+      user = {
+        id: 0,
+        roles: {
+          isAdmin: true
+        }
+      }
     }
-  }
 
-  //  call the query method passing in the playground toggle, user roles and
-  //  token for tracking
-  return (getGrpObj(true, user.id, user.roles, token, signed))
+    //  Check to see if the user exists
+    if (user === null) {
+      throw new Error('User not found.')
+    }
+    //  See if the developer token has been revoked
+    //  If there are no roles, or there is a developer role but it's false, then we may
+    //  not have a valid api token
+    if (!user.roles || !('isDeveloper' in user.roles) || user.roles.isDeveloper === false) {
+      //  But them being an admin user overrides that, so we check to see if they aren't
+      if (!('isAdmin' in user.roles) || user.roles.isAdmin === false) {
+        throw new Error('Your API token is not valid')
+      }
+    }
+
+    //  call the query method passing in the playground toggle, user roles and
+    //  token for tracking
+    return (getGrpObj(true, user.id, user.roles, token, signed))
+  } catch (er) {
+    console.log('---------------------------------------')
+    console.log('Error in route use /playground')
+    console.log(er)
+    return utils.throwError('503 Service Unavailable')
+  }
 }))
 
 // ############################################################################
