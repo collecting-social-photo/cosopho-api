@@ -443,25 +443,41 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   if (results.hits.total) total = results.hits.total
   if (results.hits.total.value) total = results.hits.total.value
 
-  const photos = results.hits.hits.map((photo) => photo._source)
+  let photos = []
+  try {
+    photos = results.hits.hits.map((photo) => photo._source)
+  } catch (er) {
+    console.log('-----------------------------------------')
+    console.log('Failed while results.hits.hits.map')
+    console.log(er)
+    utils.throwError('503 Service Unavailable')
+  }
+
   //  Now we need to go and get all the people for these photos
   if (levelDown < 2) {
-    const peopleSlugs = [...new Set(photos.map((photo) => photo.personSlug))] // unique array
-    const peopleQuery = {
-      slugs: peopleSlugs
-    }
-    if (args.instance) peopleQuery.instance = args.instance
-    if (args.instances && Array.isArray(args.instances)) peopleQuery.instances = args.instances
-    const photosPeople = await people.getPeople(peopleQuery, context)
+    try {
+      const peopleSlugs = [...new Set(photos.map((photo) => photo.personSlug))] // unique array
+      const peopleQuery = {
+        slugs: peopleSlugs
+      }
+      if (args.instance) peopleQuery.instance = args.instance
+      if (args.instances && Array.isArray(args.instances)) peopleQuery.instances = args.instances
+      const photosPeople = await people.getPeople(peopleQuery, context)
 
-    if (photosPeople) {
-      photosPeople.forEach((person) => {
-        photos.forEach((photo) => {
-          if (photo.personSlug === person.slug) {
-            photo.person = person
-          }
+      if (photosPeople) {
+        photosPeople.forEach((person) => {
+          photos.forEach((photo) => {
+            if (photo.personSlug === person.slug) {
+              photo.person = person
+            }
+          })
         })
-      })
+      }
+    } catch (er) {
+      console.log('-----------------------------------------')
+      console.log('Failed while in photos.get, doing levelDown 2')
+      console.log(er)
+      utils.throwError('503 Service Unavailable')
     }
   }
 
@@ -480,7 +496,8 @@ const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
     photos[0]._sys = sys
   }
 
-  return photos
+  //  Check the photos is JSONable
+  return utils.JSONcheck(photos)
 }
 exports.getPhotos = getPhotos
 

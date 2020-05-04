@@ -25,6 +25,32 @@ exports.getSessionId = (id) => {
     .slice(0, 32)
 }
 
-exports.throwError = (msg) => {
+const throwError = (msg) => {
   throw new Error(msg)
+}
+exports.throwError = throwError
+
+// Attempt to stringify some JSON
+exports.stringify = (json) => {
+  try {
+    return JSON.stringify(json)
+  } catch (er) {
+    console.log('------------------------------------------------------------------------')
+    console.log('Failed to JSON.stringify with')
+    console.log(json)
+    console.log('------------------------------------------------------------------------')
+    return null
+  }
+}
+
+exports.JSONcheck = (thingToJSON) => {
+  try {
+    const newThing = JSON.parse(JSON.stringify(thingToJSON))
+    return newThing
+  } catch (er) {
+    console.log('-----------------------------------------')
+    console.log('Failed in JSONcheck, cannot stringify')
+    console.log(er)
+    return throwError('503 Service Unavailable')
+  }
 }
