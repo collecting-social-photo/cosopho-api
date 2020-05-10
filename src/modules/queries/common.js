@@ -53,7 +53,7 @@ const runUpdate = async (index, type, id, doc) => {
   try {
     results = await esclient.update({
       index,
-      type,
+      type: "_doc",
       id,
       refresh: true,
       body: {
