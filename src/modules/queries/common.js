@@ -24,6 +24,7 @@ exports.createIndex = async (thing) => {
       index
     })
   }
+  return index
 }
 
 const runSearch = async (index, body) => {
@@ -38,6 +39,7 @@ const runSearch = async (index, body) => {
       body
     })
   } catch (er) {
+    if (er.message && er.message.includes('No mapping found')) return null
     utils.throwError('503 Service Unavailable')
   }
   return results
@@ -53,7 +55,7 @@ const runUpdate = async (index, type, id, doc) => {
   try {
     results = await esclient.update({
       index,
-      type: "_doc",
+      type: '_doc',
       id,
       refresh: true,
       body: {

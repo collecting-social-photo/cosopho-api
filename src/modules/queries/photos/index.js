@@ -12,9 +12,7 @@ const crypto = require('crypto')
  */
 const getPhotos = async (args, context, levelDown = 2, initialCall = false) => {
   //  Make sure the index exists
-  await common.createIndex('photos')
-
-  const index = `photos_${process.env.KEY}`
+  const index = await common.createIndex('photos')
 
   let page = common.getPage(args)
   let perPage = common.getPerPage(args)
