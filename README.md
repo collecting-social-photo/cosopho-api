@@ -69,7 +69,7 @@ The `CALLBACK_URL` is used by Auth0 for it's call back. You need to make sure th
 
 This is done so a number of Cosopho instances can be run on the same ElasticSearch cluster, you would end up with several `config_*` indexes, and `users_*` indexes etc.
 
-`SIGNEDID`, this is the _unhashed_ version of the 'GOD' API signing token. You can piut whatever value you want into here, when the app starts it will output the Admin sessionId into the logs, it will look like this...
+`SIGNEDID`, this is the _unhashed_ version of the 'GOD' API signing token. You can put whatever value you want into here, when the app starts it will output the Admin sessionId into the logs, it will look like this...
 
 ```
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
